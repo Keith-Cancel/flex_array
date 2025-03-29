@@ -41,6 +41,27 @@ where
         };
     }
 
+    pub(crate) fn expand_at_least_by(&mut self, amount: L, layout: Layout) -> FlexArrResult<()> {
+        if layout.size() == 0 {
+            // Nothing needs allocated for a ZST.
+            return Ok(());
+        }
+        let old_cap = self.capacity;
+
+        let Some(req_cap) = old_cap.checked_add(amount) else {
+            return Err(FlexArrErr::new(ErrorKind::CapacityOverflow));
+        };
+        // Increase the capacity by 50%
+        let ext_cap = old_cap + (old_cap >> L::from(1u8));
+
+        // Use the larger of these
+        let ext_cap = ext_cap.max(req_cap);
+        let ext_cap = ext_cap.max(L::from(8u8));
+        let amt = ext_cap - old_cap;
+
+        return self.expand_by(amt, layout);
+    }
+
     pub(crate) fn expand_by(&mut self, amount: L, layout: Layout) -> FlexArrResult<()> {
         if layout.size() == 0 {
             // Nothing needs allocated for a ZST.
