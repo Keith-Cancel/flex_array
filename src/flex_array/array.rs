@@ -12,6 +12,19 @@ use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
 use crate::types::LengthType;
 
+/// `FlexArr` is a dynamic array that addresses some of the limitations of Rust’s standard `Vec`.
+///
+/// `FlexArr` uses fallible allocations, meaning that instead of panicking on allocation failure,
+/// it returns an error. This allow one to handle the error in a more graceful or robust manner.
+/// `Vec` does have some fallible allocation methods, but most are currently unstable.
+///
+/// In addition, one can customize the type used for the length, capacity, and indexing operations.
+/// For example on a 64-bit system, the standard `Vec` typically uses 24 bytes. `FlexArr` specifying
+/// a smaller type than `usize` as a generic (e.g. `u32`) with `FlexArr` can reduce this overhead to
+/// just 16 bytes.
+///
+/// Lastly, the allocator API is not stable yet, so this crate provides and alternate trait `AltAllocator`
+/// that works like `Allocator` the trait and can be used with `FlexArr`
 #[derive(Debug)]
 pub struct FlexArr<T, A: AltAllocator, L: LengthType = u32>
 where
@@ -28,6 +41,10 @@ where
     const LAYOUT: Layout = Layout::new::<T>();
     const SIZE: usize = size_of::<T>();
 
+    /// Constructs a new, empty `FlexArr` using the given allocator.
+    ///
+    /// This function initializes the array without performing any memory allocation. The resulting
+    /// `FlexArr` is empty, and memory will only be allocated when elements are added.
     pub const fn new_in(alloc: A) -> Self {
         return Self {
             inner: Inner::new_in::<T>(alloc),
@@ -35,6 +52,10 @@ where
         };
     }
 
+    /// Creates a new `FlexArr` with the specified capacity using the provided allocator.
+    ///
+    /// This function attempts to allocate enough memory for the desired capacity during initialization.
+    /// If the allocation fails, a `FlexArrErr` is returned.
     pub fn with_capacity(alloc: A, capacity: L) -> FlexArrResult<Self> {
         let mut inner = Inner::new_in::<T>(alloc);
         inner.expand_by(capacity, Self::LAYOUT)?;
@@ -44,6 +65,9 @@ where
         });
     }
 
+    /// Removes and returns the last element from the `FlexArr`.
+    ///
+    /// If the array is empty, this method returns `None`.
     pub fn pop(&mut self) -> Option<T> {
         let len = self.inner.length;
         if len == L::ZERO_VALUE {
@@ -54,6 +78,15 @@ where
         return Some(ret);
     }
 
+    /// Appends an element to the end of the `FlexArr`.
+    ///
+    /// If there isn’t enough capacity, this method attempts to expand the underlying storage.
+    /// Should the allocation fail, a `FlexArrErr` is returned.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
+    /// determining the new index.
     pub fn push(&mut self, item: T) -> FlexArrResult<()> {
         let len = self.inner.length;
 
@@ -72,30 +105,54 @@ where
         return Ok(());
     }
 
+    /// Returns the number of elements `FlexArr` can store without needing to reallocate.
+    ///
+    /// For zero sized types, this function will return the maximum value for the `LengthType`.
     pub const fn capacity(&self) -> L {
         return self.inner.capacity(Self::SIZE);
     }
 
+    /// Returns the number of elements in the `FlexArr`.
     #[inline]
     pub const fn len(&self) -> L {
         return self.inner.length;
     }
 
+    /// Returns a reference to the underlying storage as a slice.
+    /// Unfortunately, since a `slice` is a built in type, the indexing operations
+    /// on it will be a `usize`.
     #[inline]
     pub fn as_slice(&self) -> &[T] {
         unsafe { slice::from_raw_parts(self.as_ptr(), self.inner.length.as_usize()) }
     }
 
+    /// Returns a mutable reference to the underlying storage as a slice.
+    /// Unfortunately, since a `slice` is a built in type, the indexing operations
+    /// on it will be a `usize`.
     #[inline]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), self.inner.length.as_usize()) }
     }
 
+    /// Returns a raw pointer to the underlying storage. If the type is zero sized
+    /// the pointer value will be a dangling pointer. Like one would get with
+    /// `NonNull::dangling()` ect...
+    ///
+    /// # Safety
+    /// The caller should ensure the underlying storage outlives this pointer.
+    /// Adding/removing items to the `FlexArr` can cause the pointer to become invalid.
     #[inline]
     pub const fn as_ptr(&self) -> *const T {
         return self.inner.get_ptr();
     }
 
+    /// Returns a raw mutable pointer to the underlying storage. If the type is zero sized
+    /// the pointer value will be a dangling pointer. Like one would get with
+    /// `NonNull::dangling()` ect...
+    ///
+    /// # Safety
+    /// The caller should ensure the underlying storage outlives this pointer.
+    /// Adding/removing items to the `FlexArr` can cause the pointer to become invalid.
     #[inline]
     pub const fn as_mut_ptr(&self) -> *mut T {
         return self.inner.get_ptr();
