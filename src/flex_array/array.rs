@@ -41,4 +41,8 @@ where
     pub const fn capacity(&self) -> L {
         return self.inner.capacity(size_of::<T>());
     }
+
+    pub const fn len(&self) -> L {
+        return self.len;
+    }
 }
