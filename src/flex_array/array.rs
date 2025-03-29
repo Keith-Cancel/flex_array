@@ -77,6 +77,11 @@ where
     }
 
     #[inline]
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
+        unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), self.len.as_usize()) }
+    }
+
+    #[inline]
     pub const fn as_ptr(&self) -> *const T {
         return self.inner.get_ptr();
     }
