@@ -217,3 +217,15 @@ where
         return &mut self.as_mut_slice()[i];
     }
 }
+
+impl<T, A: AltAllocator, L: LengthType> Drop for FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    fn drop(&mut self) {
+        unsafe {
+            ptr::drop_in_place(self.as_mut_slice());
+            self.inner.deallocate(Self::LAYOUT);
+        }
+    }
+}
