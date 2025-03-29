@@ -14,6 +14,16 @@ use core::alloc::Allocator;
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct AllocError;
 
+#[cfg(not(feature = "experimental_allocator"))]
+impl core::error::Error for AllocError {}
+
+#[cfg(not(feature = "experimental_allocator"))]
+impl core::fmt::Display for AllocError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("A memory allocation error occurred.")
+    }
+}
+
 /// The rust allocator API is not stable yet. Therefore, this trait
 /// can be used to implement/wrap a custom allocator in a no_std environment.
 /// It mirrors the unstable allocator API at the moment.
@@ -110,7 +120,6 @@ pub unsafe trait AltAllocator {
         return Ok(new);
     }
 }
-
 
 #[cfg(feature = "experimental_allocator")]
 unsafe impl<A> AltAllocator for A
