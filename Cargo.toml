@@ -10,3 +10,4 @@ description = "A `#[no_std]` flexible array much like std::Vec but with custom i
 [features]
 default = []
 experimental_allocator = []
+std_alloc = []
