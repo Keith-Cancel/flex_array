@@ -1,0 +1,17 @@
+unstable_features = true
+newline_style  = "Unix"
+imports_layout = "Vertical"
+
+max_width = 120
+array_width = 40
+group_imports = "StdExternalCrate"
+hex_literal_case = "Lower"
+imports_granularity = "Item"
+format_generated_files = false
+struct_lit_single_line = false
+match_block_trailing_comma = true
+single_line_if_else_max_width = 10
+single_line_let_else_max_width = 10
+
+enum_discrim_align_threshold = 25
+struct_field_align_threshold = 25
