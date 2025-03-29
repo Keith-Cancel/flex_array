@@ -121,6 +121,7 @@ mod std_alloc {
     use std::string::ToString;
 
     use super::*;
+    use crate::types::Global;
 
     #[test]
     fn push_pop() {
@@ -150,7 +151,7 @@ mod std_alloc {
         assert_eq!(arr.pop().unwrap(), 0xc);
         assert!(arr.pop().is_none());
 
-        let mut arr = FlexArr::<String>::new();
+        let mut arr = FlexArr::<String>::with_capacity_in(Global, 2).unwrap();
         arr.push("Hello".to_string()).unwrap();
         arr.push("There".to_string()).unwrap();
         assert_eq!(arr[0], "Hello");
