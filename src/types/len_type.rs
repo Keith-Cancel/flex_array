@@ -85,3 +85,4 @@ impl_length_type!(u8);
 impl_length_type!(u16);
 impl_length_type!(u32);
 impl_length_type!(u64);
+impl_length_type!(u128);
