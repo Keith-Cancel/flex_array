@@ -27,14 +27,27 @@ where
     Self: From<u8>,
     usize: TryFrom<Self>,
 {
+    /// The minimum value for this type.
     const MIN_VALUE: Self;
+    /// The maximum value for this type.
     const MAX_VALUE: Self;
+    /// The representation of `1` for this type.
     const ONE_VALUE: Self;
+    /// The representation of `0` for this type.
     const ZERO_VALUE: Self;
 
+    /// Converts this type to a `usize`. This will only
+    /// be called when the value by `FlexArr`` if the same
+    /// value at some point successfully used `usize::try_from(self)`.
+    ///
+    /// An implementation could be simple as:
+    /// ```Self as usize```
     fn as_usize(self) -> usize;
+    /// The same as `checked_add` for rust's built in types.
     fn checked_add(self, rhs: Self) -> Option<Self>;
+    /// The same as `checked_sub` for rust's built in types.
     fn checked_sub(self, rhs: Self) -> Option<Self>;
+    /// The same as `checked_mul` for rust's built in types.
     fn checked_mul(self, rhs: Self) -> Option<Self>;
 }
 
