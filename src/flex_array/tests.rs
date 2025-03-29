@@ -8,6 +8,7 @@ use super::FlexArr;
 use super::inner::Inner;
 use crate::types::AllocError;
 use crate::types::AltAllocator;
+use crate::types::ErrorCause;
 
 struct NoAlloc;
 
@@ -81,4 +82,35 @@ fn test_array_new() {
     assert_eq!(arr.len(), 0);
     assert_eq!(arr.capacity(), u8::MAX);
     assert_eq!(size_of_val(&arr), size_of::<ExpectedSizeU8>());
+}
+
+#[test]
+fn test_no_memory() {
+    let mut arr = FlexArr::<u32, NoAlloc>::new_in(NoAlloc);
+    assert_eq!(arr.len(), 0);
+
+    // This should fail
+    let ret = arr.push(0);
+    assert!(ret.is_err());
+    if let Err(e) = ret {
+        assert_eq!(e.cause(), ErrorCause::AllocFailure)
+    }
+
+    let mut arr = FlexArr::<(), NoAlloc, u8>::new_in(NoAlloc);
+    assert_eq!(arr.len(), 0);
+    assert_eq!(arr.capacity(), u8::MAX);
+
+    // I should be able to push this ZST 255 times.
+    for _ in 0..u8::MAX {
+        assert!(arr.push(()).is_ok());
+    }
+    assert_eq!(arr.len(), u8::MAX);
+
+    // This should fail
+    let ret = arr.push(());
+    assert!(ret.is_err());
+
+    if let Err(e) = ret {
+        assert_eq!(e.cause(), ErrorCause::CapacityOverflow)
+    }
 }
