@@ -8,4 +8,4 @@ pub use alt_alloc::AltAllocator;
 pub use errors::*;
 pub use len_type::LengthType;
 #[cfg(feature = "std_alloc")]
-pub use std_alloc::StdAlloc;
+pub use std_alloc::Global;
