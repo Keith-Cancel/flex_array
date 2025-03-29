@@ -13,15 +13,15 @@ use crate::types::FlexArrResult;
 use crate::types::LengthType;
 
 #[derive(Debug)]
-pub struct FlexArr<T, L: LengthType, A: AltAllocator>
+pub struct FlexArr<T, A: AltAllocator, L: LengthType = u32>
 where
     usize: TryFrom<L>,
 {
-    inner: Inner<L, A>,
+    inner: Inner<A, L>,
     _ph:   PhantomData<T>,
 }
 
-impl<T, L: LengthType, A: AltAllocator> FlexArr<T, L, A>
+impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
 {
@@ -102,7 +102,7 @@ where
     }
 }
 
-impl<T, L: LengthType, A: AltAllocator> Index<L> for FlexArr<T, L, A>
+impl<T, A: AltAllocator, L: LengthType> Index<L> for FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
 {
@@ -113,7 +113,7 @@ where
     }
 }
 
-impl<T, L: LengthType, A: AltAllocator> IndexMut<L> for FlexArr<T, L, A>
+impl<T, A: AltAllocator, L: LengthType> IndexMut<L> for FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
 {

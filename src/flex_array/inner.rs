@@ -19,7 +19,7 @@ const fn layout_array(layout: Layout, length: usize) -> FlexArrResult<Layout> {
 }
 
 #[derive(Debug)]
-pub(crate) struct Inner<L: LengthType, A: AltAllocator>
+pub(crate) struct Inner<A: AltAllocator, L: LengthType = u32>
 where
     usize: TryFrom<L>,
 {
@@ -31,7 +31,7 @@ where
     capacity:          L,
 }
 
-impl<L: LengthType, A: AltAllocator> Inner<L, A>
+impl<A: AltAllocator, L: LengthType> Inner<A, L>
 where
     usize: TryFrom<L>,
 {
