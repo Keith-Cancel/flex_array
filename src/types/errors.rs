@@ -44,7 +44,7 @@ impl FlexArrErr {
     pub(crate) const fn new(kind: ErrorKind) -> Self {
         return Self(kind);
     }
-    pub const fn kinda(self) -> ErrorKind {
+    pub const fn kind(self) -> ErrorKind {
         return self.0;
     }
 }
