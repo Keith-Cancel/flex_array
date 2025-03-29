@@ -27,6 +27,7 @@ where
 {
     const MIN_VALUE: Self;
     const MAX_VALUE: Self;
+    const ZERO_VALUE: Self;
     fn checked_add(self, rhs: Self) -> Option<Self>;
     fn checked_sub(self, rhs: Self) -> Option<Self>;
     fn checked_mul(self, rhs: Self) -> Option<Self>;
@@ -39,6 +40,7 @@ macro_rules! impl_length_type {
     ($typ:ty) => {
         unsafe impl LengthType for $typ {
             const MIN_VALUE: Self = Self::MIN;
+            const ZERO_VALUE: Self = 0;
             const MAX_VALUE: Self = Self::MAX;
             #[inline]
             fn checked_add(self, rhs: Self) -> Option<Self> {
