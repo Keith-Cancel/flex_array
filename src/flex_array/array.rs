@@ -44,6 +44,15 @@ where
         });
     }
 
+    pub fn pop(&mut self) -> Option<T> {
+        if self.len == L::ZERO_VALUE {
+            return None;
+        }
+        let ret = unsafe { ptr::read(self.as_ptr().add(self.len.as_usize())) };
+        self.len -= L::ONE_VALUE;
+        return Some(ret);
+    }
+
     pub fn push(&mut self, item: T) -> FlexArrResult<()> {
         let len = self.len;
 
