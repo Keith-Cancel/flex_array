@@ -111,45 +111,6 @@ pub unsafe trait AltAllocator {
     }
 }
 
-#[cfg(not(feature = "experimental_allocator"))]
-unsafe impl<A> AltAllocator for &A
-where
-    A: AltAllocator,
-{
-    fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
-        return (**self).allocate(layout);
-    }
-    fn allocate_zeroed(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
-        return (**self).allocate_zeroed(layout);
-    }
-    unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
-        unsafe { (**self).deallocate(ptr, layout) };
-    }
-    unsafe fn grow(
-        &self,
-        old_ptr: NonNull<u8>,
-        old_layout: Layout,
-        new_layout: Layout,
-    ) -> Result<NonNull<[u8]>, AllocError> {
-        return unsafe { (**self).grow(old_ptr, old_layout, new_layout) };
-    }
-    unsafe fn grow_zeroed(
-        &self,
-        old_ptr: NonNull<u8>,
-        old_layout: Layout,
-        new_layout: Layout,
-    ) -> Result<NonNull<[u8]>, AllocError> {
-        return unsafe { (**self).grow_zeroed(old_ptr, old_layout, new_layout) };
-    }
-    unsafe fn shrink(
-        &self,
-        old_ptr: NonNull<u8>,
-        old_layout: Layout,
-        new_layout: Layout,
-    ) -> Result<NonNull<[u8]>, AllocError> {
-        return unsafe { (**self).shrink(old_ptr, old_layout, new_layout) };
-    }
-}
 
 #[cfg(feature = "experimental_allocator")]
 unsafe impl<A> AltAllocator for A
