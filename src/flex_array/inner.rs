@@ -22,25 +22,25 @@ pub(crate) struct Inner<L: LengthType, A: AltAllocator>
 where
     usize: TryFrom<L>,
 {
-    ptr: NonNull<u8>,
+    ptr:      NonNull<u8>,
     capacity: L,
-    alloc: A,
+    alloc:    A,
 }
 
 impl<L: LengthType, A: AltAllocator> Inner<L, A>
 where
     usize: TryFrom<L>,
 {
-    pub const fn new_in(alloc: A, align: usize) -> Self {
+    pub(crate) const fn new_in(alloc: A, align: usize) -> Self {
         let ptr = align as *mut u8;
         return Self {
-            ptr: unsafe { NonNull::new_unchecked(ptr) },
+            ptr:      unsafe { NonNull::new_unchecked(ptr) },
             capacity: L::ZERO_VALUE,
-            alloc: alloc,
+            alloc:    alloc,
         };
     }
 
-    fn initial_alloc(alloc: A, capacity: L, layout: Layout) -> FlexArrResult<Self> {
+    pub(crate) fn initial_alloc(alloc: A, capacity: L, layout: Layout) -> FlexArrResult<Self> {
         let Ok(cap) = usize::try_from(capacity) else {
             return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
         };
@@ -61,9 +61,9 @@ where
         };
 
         return Ok(Self {
-            ptr: ptr.cast(),
+            ptr:      ptr.cast(),
             capacity: capacity,
-            alloc: alloc,
+            alloc:    alloc,
         });
     }
 }
