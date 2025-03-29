@@ -21,11 +21,11 @@ impl fmt::Display for AllocError {
     }
 }
 
-/// This enum lets one figure out what kind of error occurred durning
+/// This enum lets one figure out what the reason an error occurred durning
 /// a `FlexArr` operation.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum ErrorCause {
+pub enum ErrorReason {
     CapacityOverflow = 1,
     UsizeOverflow,
     LayoutFailure,
@@ -38,13 +38,13 @@ pub type FlexArrResult<T> = Result<T, FlexArrErr>;
 /// This is used to indicate an error during a `FlexArr` operation.
 #[repr(transparent)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct FlexArrErr(ErrorCause);
+pub struct FlexArrErr(ErrorReason);
 
 impl FlexArrErr {
-    pub(crate) const fn new(cause: ErrorCause) -> Self {
-        return Self(cause);
+    pub(crate) const fn new(reason: ErrorReason) -> Self {
+        return Self(reason);
     }
-    pub const fn cause(self) -> ErrorCause {
+    pub const fn reason(self) -> ErrorReason {
         return self.0;
     }
 }
@@ -54,10 +54,10 @@ impl Error for FlexArrErr {}
 impl fmt::Display for FlexArrErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            ErrorCause::CapacityOverflow => f.write_str("Capacity type overflowed."),
-            ErrorCause::UsizeOverflow => f.write_str("usize overflowed."),
-            ErrorCause::LayoutFailure => f.write_str("Failed to create layout."),
-            ErrorCause::AllocFailure => f.write_str("An allocation failure occurred."),
+            ErrorReason::CapacityOverflow => f.write_str("Capacity type overflowed."),
+            ErrorReason::UsizeOverflow => f.write_str("usize overflowed."),
+            ErrorReason::LayoutFailure => f.write_str("Failed to create layout."),
+            ErrorReason::AllocFailure => f.write_str("An allocation failure occurred."),
         }
     }
 }

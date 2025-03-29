@@ -8,7 +8,7 @@ use super::FlexArr;
 use super::inner::Inner;
 use crate::types::AllocError;
 use crate::types::AltAllocator;
-use crate::types::ErrorCause;
+use crate::types::ErrorReason;
 
 struct NoAlloc;
 
@@ -93,7 +93,7 @@ fn test_no_memory() {
     let ret = arr.push(0);
     assert!(ret.is_err());
     if let Err(e) = ret {
-        assert_eq!(e.cause(), ErrorCause::AllocFailure)
+        assert_eq!(e.reason(), ErrorReason::AllocFailure)
     }
 
     let mut arr = FlexArr::<(), NoAlloc, u8>::new_in(NoAlloc);
@@ -111,6 +111,6 @@ fn test_no_memory() {
     assert!(ret.is_err());
 
     if let Err(e) = ret {
-        assert_eq!(e.cause(), ErrorCause::CapacityOverflow)
+        assert_eq!(e.reason(), ErrorReason::CapacityOverflow)
     }
 }
