@@ -137,6 +137,15 @@ where
         return Some(layout);
     }
 
+    pub(crate) unsafe fn deallocate(&mut self, layout: Layout) {
+        let Some(layout) = self.current_layout(layout) else {
+            // Nothing has ever been allocated so there is no current layout.
+            // So do not deallocate.
+            return;
+        };
+        unsafe { self.alloc.deallocate(self.ptr, layout) };
+    }
+
     #[inline]
     pub(crate) const fn capacity(&self, item_sz: usize) -> L {
         if item_sz == 0 {
