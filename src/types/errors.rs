@@ -2,6 +2,8 @@
 pub use core::alloc::AllocError;
 #[cfg(feature = "experimental_allocator")]
 use core::alloc::Allocator;
+use core::error::Error;
+use core::fmt;
 
 /// This indicates some sort of memory allocation error for the alt allocator.
 ///
@@ -12,11 +14,50 @@ use core::alloc::Allocator;
 pub struct AllocError;
 
 #[cfg(not(feature = "experimental_allocator"))]
-impl core::error::Error for AllocError {}
+impl Error for AllocError {}
 
 #[cfg(not(feature = "experimental_allocator"))]
-impl core::fmt::Display for AllocError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+impl fmt::Display for AllocError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("A memory allocation error occurred.")
+    }
+}
+
+/// This enum lets one figure out what kind of error occurred durning
+/// a `FlexArr` operation.
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ErrorKind {
+    LengthOverflow = 1,
+    UsizeOverflow,
+    LayoutFailure,
+    AllocFailure,
+}
+
+
+/// A type alias for `Result<T, FlexArrErr>`
+pub type FlexArrResult<T> = Result<T, FlexArrErr>;
+
+/// This is used to indicate an error during a `FlexArr` operation.
+#[repr(transparent)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct FlexArrErr(ErrorKind);
+
+impl FlexArrErr {
+    pub const fn kinda(self) -> ErrorKind {
+        return self.0;
+    }
+}
+
+impl Error for FlexArrErr {}
+
+impl fmt::Display for FlexArrErr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            ErrorKind::LengthOverflow => f.write_str("Length type overflowed."),
+            ErrorKind::UsizeOverflow => f.write_str("usize overflowed."),
+            ErrorKind::LayoutFailure => f.write_str("Failed to create layout."),
+            ErrorKind::AllocFailure => f.write_str("An allocation failure occurred."),
+        }
     }
 }
