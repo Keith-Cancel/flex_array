@@ -68,7 +68,7 @@ where
     ///
     /// This function attempts to allocate enough memory for the desired capacity during initialization.
     /// If the allocation fails, a `FlexArrErr` is returned.
-    pub fn with_capacity(alloc: A, capacity: L) -> FlexArrResult<Self> {
+    pub fn with_capacity_in(alloc: A, capacity: L) -> FlexArrResult<Self> {
         let mut inner = Inner::new_in::<T>(alloc);
         inner.expand_by(capacity, Self::LAYOUT)?;
         return Ok(Self {
@@ -168,6 +168,32 @@ where
     #[inline]
     pub const fn as_mut_ptr(&self) -> *mut T {
         return self.inner.get_ptr();
+    }
+}
+
+#[cfg(feature = "std_alloc")]
+impl<T, L: LengthType> FlexArr<T, Global, L>
+where
+    usize: TryFrom<L>,
+{
+    /// Creates a new, empty `FlexArr` using the standard allocator.
+    ///
+    /// This functions similarly to `FlexArr::new_in()`, but automatically
+    /// uses the global allocator. No memory is allocated until elements are added
+    ///
+    /// This is only available if the `std_alloc` feature is enabled.
+    pub const fn new() -> Self {
+        return Self::new_in(Global);
+    }
+
+    /// Creates a new `FlexArr` with the specified capacity using the standard allocator.
+    ///
+    /// This functions similarly to `FlexArr::with_capacity_in()`, but automatically
+    /// uses the global allocator.
+    ///
+    /// This is only available if the `std_alloc` feature is enabled.
+    pub fn with_capacity(capacity: L) -> FlexArrResult<Self> {
+        return Self::with_capacity_in(Global, capacity);
     }
 }
 
