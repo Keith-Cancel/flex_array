@@ -1,29 +1,33 @@
 //! # Flexible Array
 //!
-//! The `flex_array` crate provides a `#[no_std]` flexible array much like  `std::Vec but` with the ability
-//! to customize the type used for the length, capacity, and indexing operations.
-//! I wrote `FlexArr` to address some of the limitations of Rust’s standard `Vec`.
+//! The `flex_array` crate provides a `#[no_std]` flexible array similar to `std::Vec`, but with
+//! greater control over memory usage. It allows customization of the types used for length,
+//! capacity, and indexing operations, making it more efficient in certain use cases.
 //!
-//! `FlexArr` uses fallible allocations, meaning that instead of panicking on allocation failure,
-//! it returns an error. This allow one to handle the error in a more graceful or robust manner.
-//! `Vec` does have some fallible allocation methods, but most are currently unstable.
+//! ## Why Use `FlexArr`?
 //!
-//! In addition, one can customize the type used for the length, capacity, and indexing operations.
-//! For example on a 64-bit system, the standard `Vec` typically uses 24 bytes. `FlexArr` specifying
-//! a smaller type than `usize` as a generic (e.g. `u32`) with `FlexArr` can reduce this overhead to
-//! just 16 bytes.
+//! I wrote `FlexArr` to address some limitations of Rust’s standard `std::Vec`:
 //!
-//! Lastly, the allocator API is not stable yet, so this crate provides and alternate trait `AltAllocator`
-//! that works like `Allocator` the trait and can be used with `FlexArr`
+//! - **Fallible Allocations**: Instead of panicking on allocation failure, `FlexArr` returns an
+//!   error, allowing for more robust or graceful error handling. While `std::Vec` has some fallible
+//!   methods, most are still unstable.
 //!
-//! # Feature Flags
-//! * `std_alloc` - This feature enables a wrapper called `Global` that implements that implements
-//! `AltAllocator` using the standard allocator APIs.
+//! - **Reduced Memory Overhead**: The `std::Vec` on a 64-bit system typically uses 24 bytes.
+//!   By specifying a smaller type for length and capacity (e.g., `u32`), `FlexArr` can reduce
+//!   this to just 16 bytes, optimizing memory usage.
 //!
-//! * `experimental_allocator` - This feature enables the use of the unstable `Allocator` trait for
-//! custom memory allocators. Further, if used in conjunction with `std_alloc` this will re-export
-//! the `Global` type from the `std` crate instead of the `Global` wrapper defined in this crate.
-
+//! - **Custom Allocator Support**: Since Rust’s allocator API is unstable, `FlexArr` introduces
+//!   the `AltAllocator` trait as an alternative to the standard `Allocator` trait. If the the
+//!   allocator API is stabilized, this will basically just become an an alias for `Allocator`.
+//!
+//! ## Feature Flags
+//!
+//! - `std_alloc` – Enables a `Global` wrapper that implements `AltAllocator` using the standard
+//!   allocator APIs.
+//!
+//! - `experimental_allocator` – Enables support for Rust’s unstable `Allocator` trait for custom
+//!   allocators. When used with `std_alloc`, this re-exports the `Global` type from `std` instead
+//!   of the custom `Global` wrapper.
 #![no_std]
 #![cfg_attr(feature = "experimental_allocator", feature(allocator_api))]
 
