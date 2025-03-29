@@ -41,31 +41,59 @@ where
         };
     }
 
-    pub(crate) fn initial_alloc(alloc: A, capacity: L, layout: Layout) -> FlexArrResult<Self> {
-        let Ok(cap) = usize::try_from(capacity) else {
+    pub(crate) fn expand_by(&mut self, amount: L, layout: Layout) -> FlexArrResult<()> {
+        if layout.size() == 0 {
+            // Nothing needs allocated for a ZST.
+            return Ok(());
+        }
+
+        let Some(new_cap) = self.capacity.checked_add(amount) else {
+            return Err(FlexArrErr::new(ErrorKind::CapacityOverflow));
+        };
+
+        let Ok(new_ucap) = usize::try_from(new_cap) else {
             return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
         };
-        let layout = layout_array(layout, cap)?;
 
-        // Don't allocate anything in this case.
-        if layout.size() == 0 {
-            return Ok(Self::new_in(alloc, layout.align()));
-        }
+        let new_layout = layout_array(layout, new_ucap)?;
 
         // Safety: rust is pretty adamant about sizes not being over isize::MAX
-        if layout.size() > (isize::MAX as usize) {
+        if new_layout.size() > (isize::MAX as usize) {
             return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
         }
 
-        let Ok(ptr) = alloc.allocate(layout) else {
-            return Err(FlexArrErr::new(ErrorKind::AllocFailure));
+        // Grow or do a normal allocation.
+        let ptr = if let Some(old_layout) = self.current_layout(layout) {
+            let Ok(ptr) = (unsafe { self.alloc.grow(self.ptr, old_layout, new_layout) }) else {
+                return Err(FlexArrErr::new(ErrorKind::AllocFailure));
+            };
+            ptr
+        } else {
+            // There is no old layout so just allocate the new memory.
+            let Ok(ptr) = self.alloc.allocate(new_layout) else {
+                return Err(FlexArrErr::new(ErrorKind::AllocFailure));
+            };
+            ptr
         };
 
-        return Ok(Self {
-            ptr:      ptr.cast(),
-            capacity: capacity,
-            alloc:    alloc,
-        });
+        self.ptr = ptr.cast();
+        self.capacity = new_cap;
+        return Ok(());
+    }
+
+    fn current_layout(&self, layout: Layout) -> Option<Layout> {
+        // Nothing has ever been allocated so there is no current layout.
+        if self.capacity == L::ZERO_VALUE {
+            return None;
+        }
+        let lay = layout.pad_to_align();
+
+        // Safety: none of these need checked since we have already
+        // allocated the memory so all of these will be valid.
+        let cap = unsafe { usize::try_from(self.capacity).unwrap_unchecked() };
+        let size = unsafe { lay.size().unchecked_mul(cap) };
+        let layout = unsafe { Layout::from_size_align_unchecked(size, lay.align()) };
+        return Some(layout);
     }
 
     #[inline]

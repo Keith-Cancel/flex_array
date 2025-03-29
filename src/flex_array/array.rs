@@ -30,7 +30,8 @@ where
 
     pub fn with_capacity(alloc: A, capacity: L) -> FlexArrResult<Self> {
         let lay = Layout::new::<T>();
-        let inner = Inner::initial_alloc(alloc, capacity, lay)?;
+        let mut inner = Inner::new_in(alloc, lay.align());
+        inner.expand_by(capacity, lay)?;
         return Ok(Self {
             inner: inner,
             len:   L::ZERO_VALUE,
