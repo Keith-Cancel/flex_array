@@ -1,0 +1,12 @@
+[package]
+name = "flex_array"
+version = "0.1.0"
+edition = "2024"
+authors = ["Keith Cancel <admin@keith.pro>"]
+description = "A flexible array much like std::Vec but with custom indices and length and capacity types."
+
+[dependencies]
+
+[features]
+default = []
+experimental_allocator = []
