@@ -1,8 +1,11 @@
 use core::alloc::Layout;
 use core::marker::PhantomData;
+use core::ptr;
 
 use super::inner::Inner;
 use crate::types::AltAllocator;
+use crate::types::ErrorKind;
+use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
 use crate::types::LengthType;
 
@@ -40,16 +43,23 @@ where
         });
     }
 
-    /*
     pub fn push(&mut self, item: T) -> FlexArrResult<()> {
-        if self.len >= self.inner.real_capacity() {
-            self.inner.expand_at_least_by(L::from(1u8), Self::LAYOUT)?;
+        let len = self.len;
+
+        if len >= self.capacity() {
+            self.inner.expand_at_least_by(L::ONE_VALUE, Self::LAYOUT)?;
         }
-        let len = unsafe { usize::try_from(self.len).unwrap_unchecked() };
+
+        let Ok(len) = usize::try_from(len) else {
+            return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
+        };
+
         let loc = unsafe { self.as_mut_ptr().add(len) };
+        unsafe { ptr::write(loc, item) };
+        self.len += L::ONE_VALUE;
+
         return Ok(());
     }
-    */
 
     pub const fn capacity(&self) -> L {
         return self.inner.capacity(Self::SIZE);
