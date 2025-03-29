@@ -1,6 +1,5 @@
 use core::alloc::Layout;
 use core::marker::PhantomData;
-use core::mem::align_of;
 
 use super::inner::Inner;
 use crate::types::AltAllocator;
@@ -22,18 +21,17 @@ where
 {
     const LAYOUT: Layout = Layout::new::<T>();
     const SIZE: usize = size_of::<T>();
-    const ALIGN: usize = align_of::<T>();
 
     pub const fn new_in(alloc: A) -> Self {
         return Self {
-            inner: Inner::new_in(alloc, Self::ALIGN),
+            inner: Inner::new_in::<T>(alloc),
             len:   L::ZERO_VALUE,
             _ph:   PhantomData,
         };
     }
 
     pub fn with_capacity(alloc: A, capacity: L) -> FlexArrResult<Self> {
-        let mut inner = Inner::new_in(alloc, Self::ALIGN);
+        let mut inner = Inner::new_in::<T>(alloc);
         inner.expand_by(capacity, Self::LAYOUT)?;
         return Ok(Self {
             inner: inner,
@@ -47,9 +45,11 @@ where
         if self.len >= self.inner.real_capacity() {
             self.inner.expand_at_least_by(L::from(1u8), Self::LAYOUT)?;
         }
-
+        let len = unsafe { usize::try_from(self.len).unwrap_unchecked() };
+        let loc = unsafe { self.as_mut_ptr().add(len) };
         return Ok(());
-    }*/
+    }
+    */
 
     pub const fn capacity(&self) -> L {
         return self.inner.capacity(Self::SIZE);
