@@ -55,7 +55,7 @@ where
             return Ok(());
         }
         // Increase the capacity by 50%
-        let ext_cap = old_cap + (old_cap >> L::from(1u8));
+        let ext_cap = old_cap + (old_cap >> L::ONE_VALUE);
 
         // Use the larger of these
         let ext_cap = ext_cap.max(req_cap);
