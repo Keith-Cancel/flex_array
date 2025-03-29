@@ -41,15 +41,19 @@ where
     }
 
     pub(crate) fn expand_at_least_by(&mut self, amount: L, layout: Layout) -> FlexArrResult<()> {
+        // Use the capacity function so this returns the MAX value for ZST.
+        let old_cap = self.capacity(layout.size());
+
+        // Do this first since if this called for a ZST it means we
+        // have hit the maximum length so we need to return an error.
+        let Some(req_cap) = old_cap.checked_add(amount) else {
+            return Err(FlexArrErr::new(ErrorKind::CapacityOverflow));
+        };
+
         if layout.size() == 0 {
             // Nothing needs allocated for a ZST.
             return Ok(());
         }
-        let old_cap = self.capacity;
-
-        let Some(req_cap) = old_cap.checked_add(amount) else {
-            return Err(FlexArrErr::new(ErrorKind::CapacityOverflow));
-        };
         // Increase the capacity by 50%
         let ext_cap = old_cap + (old_cap >> L::from(1u8));
 
@@ -121,11 +125,6 @@ where
         if item_sz == 0 {
             return L::MAX_VALUE;
         }
-        return self.capacity;
-    }
-
-    #[inline]
-    pub(crate) const fn real_capacity(&self) -> L {
         return self.capacity;
     }
 
