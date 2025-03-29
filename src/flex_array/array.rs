@@ -85,7 +85,7 @@ where
         if len == L::ZERO_VALUE {
             return None;
         }
-        let ret = unsafe { ptr::read(self.as_ptr().add(len.as_usize())) };
+        let ret = unsafe { ptr::read(self.as_ptr().add(len.as_usize() - 1)) };
         self.inner.length = len - L::ONE_VALUE;
         return Some(ret);
     }
