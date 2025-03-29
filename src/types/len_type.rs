@@ -20,9 +20,12 @@ where
     Self: ops::AddAssign,
     Self: ops::Mul<Output = Self>,
     Self: ops::MulAssign,
+    Self: ops::Shr<Output = Self>,
+    Self: ops::ShrAssign,
     Self: ops::Sub<Output = Self>,
     Self: ops::SubAssign,
     Self: Sized,
+    Self: From<u8>,
     usize: TryFrom<Self>,
 {
     const MIN_VALUE: Self;
@@ -40,8 +43,8 @@ macro_rules! impl_length_type {
     ($typ:ty) => {
         unsafe impl LengthType for $typ {
             const MIN_VALUE: Self = Self::MIN;
-            const ZERO_VALUE: Self = 0;
             const MAX_VALUE: Self = Self::MAX;
+            const ZERO_VALUE: Self = 0;
             #[inline]
             fn checked_add(self, rhs: Self) -> Option<Self> {
                 return self.checked_add(rhs);
