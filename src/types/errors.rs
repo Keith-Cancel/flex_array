@@ -1,7 +1,5 @@
 #[cfg(feature = "experimental_allocator")]
 pub use core::alloc::AllocError;
-#[cfg(feature = "experimental_allocator")]
-use core::alloc::Allocator;
 use core::error::Error;
 use core::fmt;
 
