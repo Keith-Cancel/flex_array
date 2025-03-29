@@ -1,0 +1,62 @@
+use core::alloc::Layout;
+use core::mem::size_of;
+use core::mem::size_of_val;
+use core::ptr::NonNull;
+use core::ptr::dangling_mut;
+
+use super::inner::Inner;
+use crate::types::AllocError;
+use crate::types::AltAllocator;
+
+struct NoAlloc;
+
+unsafe impl AltAllocator for NoAlloc {
+    fn allocate(&self, _: Layout) -> Result<NonNull<[u8]>, AllocError> {
+        return Err(AllocError);
+    }
+    unsafe fn deallocate(&self, _: NonNull<u8>, _: Layout) {
+        return;
+    }
+}
+
+struct ExpectedSizeU32 {
+    _p: NonNull<u8>,
+    _a: u32,
+    _b: u32,
+}
+
+struct ExpectedSizeU16 {
+    _p: NonNull<u8>,
+    _a: u16,
+    _b: u16,
+}
+
+struct ExpectedSizeU8 {
+    _p: NonNull<u8>,
+    _a: u8,
+    _b: u8,
+}
+
+#[test]
+fn test_inner_new() {
+    // Check for index type `u32`(default) and for the type `u32`
+    let inner = Inner::<NoAlloc>::new_in::<u32>(NoAlloc);
+    assert_eq!(inner.capacity(size_of::<u32>()), 0);
+    assert_eq!(inner.length, 0);
+    assert_eq!(size_of_val(&inner), size_of::<ExpectedSizeU32>());
+    assert_eq!(inner.get_ptr(), dangling_mut::<u32>());
+
+    // Check for index type u16 and for the type `u64`
+    let inner = Inner::<NoAlloc, u16>::new_in::<u64>(NoAlloc);
+    assert_eq!(inner.capacity(size_of::<u64>()), 0);
+    assert_eq!(inner.length, 0);
+    assert_eq!(size_of_val(&inner), size_of::<ExpectedSizeU16>());
+    assert_eq!(inner.get_ptr(), dangling_mut::<u64>());
+
+    // Check for index type u8 and for the type `()`
+    let inner = Inner::<NoAlloc, u8>::new_in::<()>(NoAlloc);
+    assert_eq!(inner.capacity(size_of::<()>()), u8::MAX);
+    assert_eq!(inner.length, 0);
+    assert_eq!(size_of_val(&inner), size_of::<ExpectedSizeU8>());
+    assert_eq!(inner.get_ptr(), dangling_mut::<()>());
+}
