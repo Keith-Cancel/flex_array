@@ -23,9 +23,12 @@ pub(crate) struct Inner<L: LengthType, A: AltAllocator>
 where
     usize: TryFrom<L>,
 {
-    ptr:      NonNull<u8>,
-    capacity: L,
-    alloc:    A,
+    ptr:               NonNull<u8>,
+    alloc:             A,
+    // The length is put here so rust can pack the structs more tightly.
+    // The inner impl does not use this field.
+    pub(crate) length: L,
+    capacity:          L,
 }
 
 impl<L: LengthType, A: AltAllocator> Inner<L, A>
@@ -36,6 +39,7 @@ where
     pub(crate) const fn new_in<T>(alloc: A) -> Self {
         return Self {
             ptr:      NonNull::<T>::dangling().cast(),
+            length:   L::ZERO_VALUE,
             capacity: L::ZERO_VALUE,
             alloc:    alloc,
         };

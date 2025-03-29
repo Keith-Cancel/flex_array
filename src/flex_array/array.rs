@@ -18,7 +18,6 @@ where
     usize: TryFrom<L>,
 {
     inner: Inner<L, A>,
-    len:   L,
     _ph:   PhantomData<T>,
 }
 
@@ -32,7 +31,6 @@ where
     pub const fn new_in(alloc: A) -> Self {
         return Self {
             inner: Inner::new_in::<T>(alloc),
-            len:   L::ZERO_VALUE,
             _ph:   PhantomData,
         };
     }
@@ -42,22 +40,22 @@ where
         inner.expand_by(capacity, Self::LAYOUT)?;
         return Ok(Self {
             inner: inner,
-            len:   L::ZERO_VALUE,
             _ph:   PhantomData,
         });
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        if self.len == L::ZERO_VALUE {
+        let len = self.inner.length;
+        if len == L::ZERO_VALUE {
             return None;
         }
-        let ret = unsafe { ptr::read(self.as_ptr().add(self.len.as_usize())) };
-        self.len -= L::ONE_VALUE;
+        let ret = unsafe { ptr::read(self.as_ptr().add(len.as_usize())) };
+        self.inner.length = len - L::ONE_VALUE;
         return Some(ret);
     }
 
     pub fn push(&mut self, item: T) -> FlexArrResult<()> {
-        let len = self.len;
+        let len = self.inner.length;
 
         if len >= self.capacity() {
             self.inner.expand_at_least_by(L::ONE_VALUE, Self::LAYOUT)?;
@@ -69,7 +67,7 @@ where
 
         let loc = unsafe { self.as_mut_ptr().add(len) };
         unsafe { ptr::write(loc, item) };
-        self.len += L::ONE_VALUE;
+        self.inner.length += L::ONE_VALUE;
 
         return Ok(());
     }
@@ -80,17 +78,17 @@ where
 
     #[inline]
     pub const fn len(&self) -> L {
-        return self.len;
+        return self.inner.length;
     }
 
     #[inline]
     pub fn as_slice(&self) -> &[T] {
-        unsafe { slice::from_raw_parts(self.as_ptr(), self.len.as_usize()) }
+        unsafe { slice::from_raw_parts(self.as_ptr(), self.inner.length.as_usize()) }
     }
 
     #[inline]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
-        unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), self.len.as_usize()) }
+        unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), self.inner.length.as_usize()) }
     }
 
     #[inline]
