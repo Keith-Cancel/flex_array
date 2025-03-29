@@ -56,7 +56,7 @@ impl Error for FlexArrErr {}
 impl fmt::Display for FlexArrErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            ErrorKind::CapacityOverflow => f.write_str("Length type overflowed."),
+            ErrorKind::CapacityOverflow => f.write_str("Capacity type overflowed."),
             ErrorKind::UsizeOverflow => f.write_str("usize overflowed."),
             ErrorKind::LayoutFailure => f.write_str("Failed to create layout."),
             ErrorKind::AllocFailure => f.write_str("An allocation failure occurred."),
