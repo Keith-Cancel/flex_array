@@ -111,11 +111,11 @@ where
             return None;
         }
         let lay = layout.pad_to_align();
+        let cap = self.capacity.as_usize();
+        let size = lay.size() * cap;
 
-        // Safety: none of these need checked since we have already
+        // Safety: This does not need to bechecked since we have already
         // allocated the memory so all of these will be valid.
-        let cap = unsafe { usize::try_from(self.capacity).unwrap_unchecked() };
-        let size = unsafe { lay.size().unchecked_mul(cap) };
         let layout = unsafe { Layout::from_size_align_unchecked(size, lay.align()) };
         return Some(layout);
     }
