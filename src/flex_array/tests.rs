@@ -40,7 +40,7 @@ struct ExpectedSizeU8 {
 }
 
 #[test]
-fn test_inner_new() {
+fn inner_new() {
     // Check for index type `u32`(default) and for the type `u32`
     let inner = Inner::<NoAlloc>::new_in::<u32>(NoAlloc);
     assert_eq!(inner.capacity(size_of::<u32>()), 0);
@@ -64,7 +64,7 @@ fn test_inner_new() {
 }
 
 #[test]
-fn test_array_new() {
+fn array_new() {
     // u32 length and u32 type
     let arr = FlexArr::<u32, NoAlloc>::new_in(NoAlloc);
     assert_eq!(arr.len(), 0);
@@ -85,7 +85,7 @@ fn test_array_new() {
 }
 
 #[test]
-fn test_no_memory() {
+fn no_memory() {
     let mut arr = FlexArr::<u32, NoAlloc>::new_in(NoAlloc);
     assert_eq!(arr.len(), 0);
 
@@ -112,5 +112,51 @@ fn test_no_memory() {
 
     if let Err(e) = ret {
         assert_eq!(e.reason(), ErrorReason::CapacityOverflow)
+    }
+}
+
+#[cfg(feature = "std_alloc")]
+mod std_alloc {
+    use std::string::String;
+    use std::string::ToString;
+
+    use super::*;
+
+    #[test]
+    fn push_pop() {
+        let mut arr = FlexArr::<u8>::new();
+        assert_eq!(size_of_val(&arr), size_of::<ExpectedSizeU32>());
+
+        arr.push(0xcu8).unwrap();
+        arr.push(0xau8).unwrap();
+        arr.push(0xfu8).unwrap();
+        arr.push(0xeu8).unwrap();
+
+        assert_eq!(arr.len(), 4);
+
+        assert_eq!(arr[0u32], 0xc);
+        assert_eq!(arr[1u32], 0xa);
+        assert_eq!(arr[2u32], 0xf);
+        assert_eq!(arr[3u32], 0xe);
+
+        assert_eq!(arr.pop().unwrap(), 0xeu8);
+
+        arr.push(127).unwrap();
+        assert_eq!(arr[3], 127);
+
+        assert_eq!(arr.pop().unwrap(), 127);
+        assert_eq!(arr.pop().unwrap(), 0xf);
+        assert_eq!(arr.pop().unwrap(), 0xa);
+        assert_eq!(arr.pop().unwrap(), 0xc);
+        assert!(arr.pop().is_none());
+
+        let mut arr = FlexArr::<String>::new();
+        arr.push("Hello".to_string()).unwrap();
+        arr.push("There".to_string()).unwrap();
+        assert_eq!(arr[0], "Hello");
+        assert_eq!(arr[1], "There");
+
+        let there = arr.pop().unwrap();
+        assert_eq!(there, "There");
     }
 }
