@@ -4,5 +4,7 @@
 #[cfg(any(feature = "std_alloc", test))]
 extern crate std;
 
-pub mod flex_array;
+mod flex_array;
 pub mod types;
+
+pub use flex_array::FlexArr;
