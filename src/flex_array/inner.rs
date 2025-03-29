@@ -129,4 +129,10 @@ where
     pub(crate) const fn real_capacity(&self) -> L {
         return self.capacity;
     }
+
+    #[inline]
+    pub(crate) const fn get_ptr<T>(&self) -> *mut T {
+        let ptr = self.ptr.cast::<T>();
+        return ptr.as_ptr();
+    }
 }
