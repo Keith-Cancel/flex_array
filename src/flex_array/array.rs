@@ -70,6 +70,15 @@ where
         return self.len;
     }
 
+    #[inline(always)]
+    pub(crate) fn len_usize(&self) -> usize {
+        // The current length value must always be able to be converted to
+        // a usize since it had to be converted to usize at some point
+        // either as value less than the capacity or the length directly
+        // called with try_from.
+        return unsafe { usize::try_from(self.len).unwrap_unchecked() };
+    }
+
     #[inline]
     pub const fn as_ptr(&self) -> *const T {
         return self.inner.get_ptr();
