@@ -1,5 +1,7 @@
 use core::alloc::Layout;
 use core::marker::PhantomData;
+use core::ops::Index;
+use core::ops::IndexMut;
 use core::ptr;
 use core::slice;
 
@@ -10,6 +12,7 @@ use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
 use crate::types::LengthType;
 
+#[derive(Debug)]
 pub struct FlexArr<T, L: LengthType, A: AltAllocator>
 where
     usize: TryFrom<L>,
@@ -98,5 +101,26 @@ where
     #[inline]
     pub const fn as_mut_ptr(&self) -> *mut T {
         return self.inner.get_ptr();
+    }
+}
+
+impl<T, L: LengthType, A: AltAllocator> Index<L> for FlexArr<T, L, A>
+where
+    usize: TryFrom<L>,
+{
+    type Output = T;
+    fn index(&self, index: L) -> &Self::Output {
+        let i = index.as_usize();
+        return &self.as_slice()[i];
+    }
+}
+
+impl<T, L: LengthType, A: AltAllocator> IndexMut<L> for FlexArr<T, L, A>
+where
+    usize: TryFrom<L>,
+{
+    fn index_mut(&mut self, index: L) -> &mut Self::Output {
+        let i = index.as_usize();
+        return &mut self.as_mut_slice()[i];
     }
 }
