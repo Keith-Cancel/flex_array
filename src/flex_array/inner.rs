@@ -2,7 +2,7 @@ use core::alloc::Layout;
 use core::ptr::NonNull;
 
 use crate::types::AltAllocator;
-use crate::types::ErrorKind;
+use crate::types::ErrorCause;
 use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
 use crate::types::LengthType;
@@ -10,10 +10,10 @@ use crate::types::LengthType;
 const fn layout_array(layout: Layout, length: usize) -> FlexArrResult<Layout> {
     let lay = layout.pad_to_align();
     let Some(len) = length.checked_mul(lay.size()) else {
-        return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
+        return Err(FlexArrErr::new(ErrorCause::UsizeOverflow));
     };
     let Ok(lay) = Layout::from_size_align(len, layout.align()) else {
-        return Err(FlexArrErr::new(ErrorKind::LayoutFailure));
+        return Err(FlexArrErr::new(ErrorCause::LayoutFailure));
     };
     return Ok(lay);
 }
@@ -52,7 +52,7 @@ where
         // Do this first since if this called for a ZST it means we
         // have hit the maximum length so we need to return an error.
         let Some(req_cap) = old_cap.checked_add(amount) else {
-            return Err(FlexArrErr::new(ErrorKind::CapacityOverflow));
+            return Err(FlexArrErr::new(ErrorCause::CapacityOverflow));
         };
 
         if layout.size() == 0 {
@@ -77,30 +77,30 @@ where
         }
 
         let Some(new_cap) = self.capacity.checked_add(amount) else {
-            return Err(FlexArrErr::new(ErrorKind::CapacityOverflow));
+            return Err(FlexArrErr::new(ErrorCause::CapacityOverflow));
         };
 
         let Ok(new_ucap) = usize::try_from(new_cap) else {
-            return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
+            return Err(FlexArrErr::new(ErrorCause::UsizeOverflow));
         };
 
         let new_layout = layout_array(layout, new_ucap)?;
 
         // Safety: rust is pretty adamant about sizes not being over isize::MAX
         if new_layout.size() > (isize::MAX as usize) {
-            return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
+            return Err(FlexArrErr::new(ErrorCause::UsizeOverflow));
         }
 
         // Grow or do a normal allocation.
         let ptr = if let Some(old_layout) = self.current_layout(layout) {
             let Ok(ptr) = (unsafe { self.alloc.grow(self.ptr, old_layout, new_layout) }) else {
-                return Err(FlexArrErr::new(ErrorKind::AllocFailure));
+                return Err(FlexArrErr::new(ErrorCause::AllocFailure));
             };
             ptr
         } else {
             // There is no old layout so just allocate the new memory.
             let Ok(ptr) = self.alloc.allocate(new_layout) else {
-                return Err(FlexArrErr::new(ErrorKind::AllocFailure));
+                return Err(FlexArrErr::new(ErrorCause::AllocFailure));
             };
             ptr
         };

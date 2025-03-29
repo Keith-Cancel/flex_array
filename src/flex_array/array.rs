@@ -7,7 +7,7 @@ use core::slice;
 
 use super::inner::Inner;
 use crate::types::AltAllocator;
-use crate::types::ErrorKind;
+use crate::types::ErrorCause;
 use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
 use crate::types::LengthType;
@@ -62,7 +62,7 @@ where
         }
 
         let Ok(len) = usize::try_from(len) else {
-            return Err(FlexArrErr::new(ErrorKind::UsizeOverflow));
+            return Err(FlexArrErr::new(ErrorCause::UsizeOverflow));
         };
 
         let loc = unsafe { self.as_mut_ptr().add(len) };
