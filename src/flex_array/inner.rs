@@ -31,6 +31,7 @@ impl<L: LengthType, A: AltAllocator> Inner<L, A>
 where
     usize: TryFrom<L>,
 {
+    #[inline]
     pub(crate) const fn new_in(alloc: A, align: usize) -> Self {
         let ptr = align as *mut u8;
         return Self {
@@ -65,5 +66,13 @@ where
             capacity: capacity,
             alloc:    alloc,
         });
+    }
+
+    #[inline]
+    pub(crate) const fn capacity(&self, item_sz: usize) -> L {
+        if item_sz == 0 {
+            return L::MAX_VALUE;
+        }
+        return self.capacity;
     }
 }
