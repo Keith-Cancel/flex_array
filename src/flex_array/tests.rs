@@ -4,6 +4,7 @@ use core::mem::size_of_val;
 use core::ptr::NonNull;
 use core::ptr::dangling_mut;
 
+use super::FlexArr;
 use super::inner::Inner;
 use crate::types::AllocError;
 use crate::types::AltAllocator;
@@ -59,4 +60,25 @@ fn test_inner_new() {
     assert_eq!(inner.length, 0);
     assert_eq!(size_of_val(&inner), size_of::<ExpectedSizeU8>());
     assert_eq!(inner.get_ptr(), dangling_mut::<()>());
+}
+
+#[test]
+fn test_array_new() {
+    // u32 length and u32 type
+    let arr = FlexArr::<u32, NoAlloc>::new_in(NoAlloc);
+    assert_eq!(arr.len(), 0);
+    assert_eq!(arr.capacity(), 0);
+    assert_eq!(size_of_val(&arr), size_of::<ExpectedSizeU32>());
+
+    // u16 length and u64 type
+    let arr = FlexArr::<u64, NoAlloc, u16>::new_in(NoAlloc);
+    assert_eq!(arr.len(), 0);
+    assert_eq!(arr.capacity(), 0);
+    assert_eq!(size_of_val(&arr), size_of::<ExpectedSizeU16>());
+
+    // u8 length and `()`type
+    let arr = FlexArr::<(), NoAlloc, u8>::new_in(NoAlloc);
+    assert_eq!(arr.len(), 0);
+    assert_eq!(arr.capacity(), u8::MAX);
+    assert_eq!(size_of_val(&arr), size_of::<ExpectedSizeU8>());
 }
