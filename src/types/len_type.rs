@@ -36,9 +36,6 @@ where
     fn checked_add(self, rhs: Self) -> Option<Self>;
     fn checked_sub(self, rhs: Self) -> Option<Self>;
     fn checked_mul(self, rhs: Self) -> Option<Self>;
-    fn checked_div(self, rhs: Self) -> Option<Self>;
-    fn checked_rem(self, rhs: Self) -> Option<Self>;
-    fn count_ones(self) -> u32;
 }
 
 macro_rules! impl_length_type {
@@ -65,18 +62,6 @@ macro_rules! impl_length_type {
             #[inline]
             fn checked_mul(self, rhs: Self) -> Option<Self> {
                 return self.checked_mul(rhs);
-            }
-            #[inline]
-            fn checked_div(self, rhs: Self) -> Option<Self> {
-                return self.checked_div(rhs);
-            }
-            #[inline]
-            fn checked_rem(self, rhs: Self) -> Option<Self> {
-                return self.checked_rem(rhs);
-            }
-            #[inline]
-            fn count_ones(self) -> u32 {
-                return self.count_ones();
             }
         }
     };
