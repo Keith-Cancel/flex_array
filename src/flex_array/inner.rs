@@ -124,4 +124,9 @@ where
         }
         return self.capacity;
     }
+
+    #[inline]
+    pub(crate) const fn real_capacity(&self) -> L {
+        return self.capacity;
+    }
 }
