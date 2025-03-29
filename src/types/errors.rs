@@ -28,12 +28,11 @@ impl fmt::Display for AllocError {
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ErrorKind {
-    LengthOverflow = 1,
+    CapacityOverflow = 1,
     UsizeOverflow,
     LayoutFailure,
     AllocFailure,
 }
-
 
 /// A type alias for `Result<T, FlexArrErr>`
 pub type FlexArrResult<T> = Result<T, FlexArrErr>;
@@ -44,6 +43,9 @@ pub type FlexArrResult<T> = Result<T, FlexArrErr>;
 pub struct FlexArrErr(ErrorKind);
 
 impl FlexArrErr {
+    pub(crate) const fn new(kind: ErrorKind) -> Self {
+        return Self(kind);
+    }
     pub const fn kinda(self) -> ErrorKind {
         return self.0;
     }
@@ -54,7 +56,7 @@ impl Error for FlexArrErr {}
 impl fmt::Display for FlexArrErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            ErrorKind::LengthOverflow => f.write_str("Length type overflowed."),
+            ErrorKind::CapacityOverflow => f.write_str("Length type overflowed."),
             ErrorKind::UsizeOverflow => f.write_str("usize overflowed."),
             ErrorKind::LayoutFailure => f.write_str("Failed to create layout."),
             ErrorKind::AllocFailure => f.write_str("An allocation failure occurred."),
