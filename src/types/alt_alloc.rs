@@ -1,7 +1,14 @@
 use core::alloc::Layout;
 use core::ptr::NonNull;
 
+#[cfg(feature = "experimental_allocator")]
+pub use core::alloc::{AllocError, Allocator};
+
+#[cfg(feature = "experimental_allocator")]
+pub type AltAllocErr = AllocError;
+
 /// This indicates some sort of memory allocation error for the alt allocator.
+#[cfg(not(feature = "experimental_allocator"))]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct AltAllocErr;
 
@@ -102,6 +109,7 @@ pub unsafe trait AltAllocator {
     }
 }
 
+#[cfg(not(feature = "experimental_allocator"))]
 unsafe impl<A> AltAllocator for &A
 where
     A: AltAllocator,
@@ -138,5 +146,51 @@ where
         new_layout: Layout,
     ) -> Result<NonNull<[u8]>, AltAllocErr> {
         return unsafe { (**self).shrink(old_ptr, old_layout, new_layout) };
+    }
+}
+
+#[cfg(feature = "experimental_allocator")]
+unsafe impl<A> AltAllocator for A
+where
+    A: Allocator,
+{
+    #[inline]
+    fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AltAllocErr> {
+        return <Self as Allocator>::allocate(self, layout);
+    }
+    #[inline]
+    unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
+        unsafe { <Self as Allocator>::deallocate(self, ptr, layout) };
+    }
+    #[inline]
+    fn allocate_zeroed(&self, layout: Layout) -> Result<NonNull<[u8]>, AltAllocErr> {
+        return <Self as Allocator>::allocate_zeroed(self, layout);
+    }
+    #[inline]
+    unsafe fn grow(
+        &self,
+        old_ptr: NonNull<u8>,
+        old_layout: Layout,
+        new_layout: Layout,
+    ) -> Result<NonNull<[u8]>, AltAllocErr> {
+        return unsafe { <Self as Allocator>::grow(self, old_ptr, old_layout, new_layout) };
+    }
+    #[inline]
+    unsafe fn grow_zeroed(
+        &self,
+        old_ptr: NonNull<u8>,
+        old_layout: Layout,
+        new_layout: Layout,
+    ) -> Result<NonNull<[u8]>, AltAllocErr> {
+        return unsafe { <Self as Allocator>::grow_zeroed(self, old_ptr, old_layout, new_layout) };
+    }
+    #[inline]
+    unsafe fn shrink(
+        &self,
+        old_ptr: NonNull<u8>,
+        old_layout: Layout,
+        new_layout: Layout,
+    ) -> Result<NonNull<[u8]>, AltAllocErr> {
+        return unsafe { <Self as Allocator>::shrink(self, old_ptr, old_layout, new_layout) };
     }
 }
