@@ -18,6 +18,7 @@ const fn layout_array(layout: Layout, length: usize) -> FlexArrResult<Layout> {
     return Ok(lay);
 }
 
+#[derive(Debug)]
 pub(crate) struct Inner<L: LengthType, A: AltAllocator>
 where
     usize: TryFrom<L>,
