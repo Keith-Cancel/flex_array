@@ -5,6 +5,8 @@ use crate::types::AltAllocator;
 use crate::types::ErrorReason;
 use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
+#[cfg(feature = "std_alloc")]
+use crate::types::Global;
 use crate::types::LengthType;
 
 const fn layout_array(layout: Layout, length: usize) -> FlexArrResult<Layout> {
@@ -18,18 +20,28 @@ const fn layout_array(layout: Layout, length: usize) -> FlexArrResult<Layout> {
     return Ok(lay);
 }
 
-#[derive(Debug)]
-pub(crate) struct Inner<A: AltAllocator, L: LengthType = u32>
-where
-    usize: TryFrom<L>,
-{
-    ptr:               NonNull<u8>,
-    alloc:             A,
-    // The length is put here so rust can pack the structs more tightly.
-    // The inner impl does not use this field.
-    pub(crate) length: L,
-    capacity:          L,
+macro_rules! define_inner_struct {
+    ($($global:ty)?) => {
+        #[derive(Debug)]
+        pub(crate) struct Inner<A: AltAllocator $(= $global)?, L: LengthType = u32>
+        where
+            usize: TryFrom<L>,
+        {
+            ptr:               NonNull<u8>,
+            alloc:             A,
+            // The length is put here so rust can pack the structs more tightly.
+            // The inner impl does not use this field.
+            pub(crate) length: L,
+            capacity:          L,
+        }
+    };
 }
+
+#[cfg(feature = "std_alloc")]
+define_inner_struct!(Global);
+
+#[cfg(not(feature = "std_alloc"))]
+define_inner_struct!();
 
 impl<A: AltAllocator, L: LengthType> Inner<A, L>
 where

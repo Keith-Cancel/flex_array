@@ -10,29 +10,41 @@ use crate::types::AltAllocator;
 use crate::types::ErrorReason;
 use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
+#[cfg(feature = "std_alloc")]
+use crate::types::Global;
 use crate::types::LengthType;
 
-/// `FlexArr` is a dynamic array that addresses some of the limitations of Rust’s standard `Vec`.
-///
-/// `FlexArr` uses fallible allocations, meaning that instead of panicking on allocation failure,
-/// it returns an error. This allow one to handle the error in a more graceful or robust manner.
-/// `Vec` does have some fallible allocation methods, but most are currently unstable.
-///
-/// In addition, one can customize the type used for the length, capacity, and indexing operations.
-/// For example on a 64-bit system, the standard `Vec` typically uses 24 bytes. `FlexArr` specifying
-/// a smaller type than `usize` as a generic (e.g. `u32`) with `FlexArr` can reduce this overhead to
-/// just 16 bytes.
-///
-/// Lastly, the allocator API is not stable yet, so this crate provides and alternate trait `AltAllocator`
-/// that works like `Allocator` the trait and can be used with `FlexArr`
-#[derive(Debug)]
-pub struct FlexArr<T, A: AltAllocator, L: LengthType = u32>
-where
-    usize: TryFrom<L>,
-{
-    inner: Inner<A, L>,
-    _ph:   PhantomData<T>,
+macro_rules! define_array_struct {
+    ($($global:ty)?) => {
+        /// `FlexArr` is a dynamic array that addresses some of the limitations of Rust’s standard `Vec`.
+        ///
+        /// `FlexArr` uses fallible allocations, meaning that instead of panicking on allocation failure,
+        /// it returns an error. This allow one to handle the error in a more graceful or robust manner.
+        /// `Vec` does have some fallible allocation methods, but most are currently unstable.
+        ///
+        /// In addition, one can customize the type used for the length, capacity, and indexing operations.
+        /// For example on a 64-bit system, the standard `Vec` typically uses 24 bytes. `FlexArr` specifying
+        /// a smaller type than `usize` as a generic (e.g. `u32`) with `FlexArr` can reduce this overhead to
+        /// just 16 bytes.
+        ///
+        /// Lastly, the allocator API is not stable yet, so this crate provides and alternate trait `AltAllocator`
+        /// that works like `Allocator` the trait and can be used with `FlexArr`
+        #[derive(Debug)]
+        pub struct FlexArr<T, A: AltAllocator $(= $global)?, L: LengthType = u32>
+        where
+            usize: TryFrom<L>,
+        {
+            inner: Inner<A, L>,
+            _ph:   PhantomData<T>,
+        }
+    };
 }
+
+#[cfg(feature = "std_alloc")]
+define_array_struct!(Global);
+
+#[cfg(not(feature = "std_alloc"))]
+define_array_struct!();
 
 impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
 where
