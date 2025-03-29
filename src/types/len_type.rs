@@ -8,7 +8,6 @@ use core::ops;
 ///
 /// It's marked as unsafe since your type must be continuous and ordered.
 /// under common operations such as addition multiplication like integers.
-///
 pub unsafe trait LengthType
 where
     Self: Copy,
@@ -33,6 +32,7 @@ where
     const ONE_VALUE: Self;
     const ZERO_VALUE: Self;
 
+    fn as_usize(self) -> usize;
     fn checked_add(self, rhs: Self) -> Option<Self>;
     fn checked_sub(self, rhs: Self) -> Option<Self>;
     fn checked_mul(self, rhs: Self) -> Option<Self>;
@@ -48,6 +48,11 @@ macro_rules! impl_length_type {
             const MAX_VALUE: Self = Self::MAX;
             const ONE_VALUE: Self = 1;
             const ZERO_VALUE: Self = 0;
+
+            #[inline(always)]
+            fn as_usize(self) -> usize {
+                return self as usize;
+            }
 
             #[inline]
             fn checked_add(self, rhs: Self) -> Option<Self> {
