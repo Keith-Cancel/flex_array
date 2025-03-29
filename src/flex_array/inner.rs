@@ -32,10 +32,9 @@ where
     usize: TryFrom<L>,
 {
     #[inline]
-    pub(crate) const fn new_in(alloc: A, align: usize) -> Self {
-        let ptr = align as *mut u8;
+    pub(crate) const fn new_in<T>(alloc: A) -> Self {
         return Self {
-            ptr:      unsafe { NonNull::new_unchecked(ptr) },
+            ptr:      NonNull::<T>::dangling().cast(),
             capacity: L::ZERO_VALUE,
             alloc:    alloc,
         };
