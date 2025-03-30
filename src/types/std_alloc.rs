@@ -19,7 +19,7 @@ mod alloc_def {
     /// This is basically a wrapper around the std global allocator APIs.
     ///
     /// See:
-    /// https://doc.rust-lang.org/std/alloc/struct.Global.html
+    /// <https://doc.rust-lang.org/std/alloc/struct.Global.html>
     ///
     /// It has the same name as `Global` since the allocator APIs are
     /// not stabilized yet. When stabilized this will be just removed.

@@ -1,16 +1,16 @@
-use super::AllocError;
+#[cfg(feature = "experimental_allocator")]
+use core::alloc::Allocator;
 use core::alloc::Layout;
 use core::ptr::NonNull;
 
-#[cfg(feature = "experimental_allocator")]
-use core::alloc::Allocator;
+use super::AllocError;
 
 /// The rust allocator API is not stable yet. Therefore, this trait
 /// can be used to implement/wrap a custom allocator in a no_std environment.
 /// It mirrors the unstable allocator API at the moment.
 ///
 /// This mirrors the safety requirements of the allocator API:
-/// https://doc.rust-lang.org/std/alloc/trait.Allocator.html
+/// <https://doc.rust-lang.org/std/alloc/trait.Allocator.html>
 ///
 ///
 /// If the allocator api is ever marked as stable this trait probably can
