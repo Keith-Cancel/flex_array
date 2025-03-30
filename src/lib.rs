@@ -10,7 +10,7 @@
 //!
 //! - **Reduced Memory Overhead**: The `std::Vec` on a 64-bit system typically uses 24 bytes.
 //!   By specifying a smaller type for length and capacity (e.g., `u32`), `FlexArr` can reduce
-//!   this to just 16 bytes, optimizing memory usage.
+//!   this to just 16 bytes, helping one optimizing memory usage.
 //!
 //! - **Fallible Allocations**: Instead of panicking on allocation failure, `FlexArr` returns an
 //!   error, allowing for more robust or graceful error handling. While `std::Vec` has some fallible
