@@ -145,13 +145,15 @@ mod std_alloc {
         arr.push(127).unwrap();
         assert_eq!(arr[3], 127);
 
+        arr[0] = 0x99;
+
         assert_eq!(arr.pop().unwrap(), 127);
         assert_eq!(arr.pop().unwrap(), 0xf);
         assert_eq!(arr.pop().unwrap(), 0xa);
-        assert_eq!(arr.pop().unwrap(), 0xc);
+        assert_eq!(arr.pop().unwrap(), 0x99);
         assert!(arr.pop().is_none());
 
-        let mut arr = FlexArr::<String>::with_capacity_in(Global, 2).unwrap();
+        let mut arr = FlexArr::<String>::with_capacity(2).unwrap();
         arr.push("Hello".to_string()).unwrap();
         arr.push("There".to_string()).unwrap();
         assert_eq!(arr[0], "Hello");
@@ -159,5 +161,36 @@ mod std_alloc {
 
         let there = arr.pop().unwrap();
         assert_eq!(there, "There");
+    }
+
+    #[test]
+    fn usize_failure() {
+        let massive: u128 = (usize::MAX as u128) + 1;
+        let ret = FlexArr::<u8, Global, u128>::with_capacity_in(Global, massive);
+        assert!(ret.is_err());
+        if let Err(e) = ret {
+            assert_eq!(e.reason(), ErrorReason::UsizeOverflow);
+        }
+
+        let massive: u128 = (isize::MAX as u128) + 1;
+        let ret = FlexArr::<u8, Global, u128>::with_capacity_in(Global, massive);
+        assert!(ret.is_err());
+        if let Err(e) = ret {
+            assert_eq!(e.reason(), ErrorReason::LayoutFailure);
+        }
+
+        let massive = (usize::MAX / 256) + 1;
+        let ret = FlexArr::<[u8; 256], Global, usize>::with_capacity_in(Global, massive);
+        assert!(ret.is_err());
+        if let Err(e) = ret {
+            assert_eq!(e.reason(), ErrorReason::UsizeOverflow);
+        }
+
+        let massive = ((isize::MAX / 256) + 1) as usize;
+        let ret = FlexArr::<[u8; 256], Global, usize>::with_capacity_in(Global, massive);
+        assert!(ret.is_err());
+        if let Err(e) = ret {
+            assert_eq!(e.reason(), ErrorReason::LayoutFailure);
+        }
     }
 }
