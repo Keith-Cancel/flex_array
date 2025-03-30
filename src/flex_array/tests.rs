@@ -164,7 +164,7 @@ mod std_alloc {
     }
 
     #[test]
-    fn usize_failure() {
+    fn usize_and_layout_failure() {
         let massive: u128 = (usize::MAX as u128) + 1;
         let ret = FlexArr::<u8, Global, u128>::with_capacity_in(Global, massive);
         assert!(ret.is_err());
