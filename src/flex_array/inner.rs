@@ -67,10 +67,6 @@ where
             return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
         };
 
-        if layout.size() == 0 {
-            // Nothing needs allocated for a ZST.
-            return Ok(());
-        }
         // Increase the capacity by 50%
         let ext_cap = old_cap + (old_cap >> L::ONE_VALUE);
 
