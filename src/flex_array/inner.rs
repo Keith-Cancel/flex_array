@@ -57,38 +57,26 @@ where
         };
     }
 
-    pub(crate) fn expand_at_least_by(&mut self, amount: L, layout: Layout) -> FlexArrResult<()> {
+    pub(crate) fn expand_capacity_at_least(&mut self, capacity: L, layout: Layout) -> FlexArrResult<()> {
         // Use the capacity function so this returns the MAX value for ZST.
         let old_cap = self.capacity(layout.size());
-
-        // Do this first since if this called for a ZST it means we
-        // have hit the maximum length so we need to return an error.
-        let Some(req_cap) = old_cap.checked_add(amount) else {
-            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
-        };
-
         // Increase the capacity by 50%
-        let ext_cap = old_cap + (old_cap >> L::ONE_VALUE);
+        // Also don't care if this overflows. Max ensures that will
+        // at least get the capacity needed.
+        let new_cap = old_cap + (old_cap >> L::ONE_VALUE);
+        let new_cap = new_cap.max(capacity);
+        let new_cap = new_cap.max(L::from(8u8));
 
-        // Use the larger of these
-        let ext_cap = ext_cap.max(req_cap);
-        let ext_cap = ext_cap.max(L::from(8u8));
-        let amt = ext_cap - old_cap;
-
-        return self.expand_by(amt, layout);
+        return self.expand_capacity_to(new_cap, layout);
     }
 
-    pub(crate) fn expand_by(&mut self, amount: L, layout: Layout) -> FlexArrResult<()> {
+    pub(crate) fn expand_capacity_to(&mut self, capacity: L, layout: Layout) -> FlexArrResult<()> {
         if layout.size() == 0 {
             // Nothing needs allocated for a ZST.
             return Ok(());
         }
 
-        let Some(new_cap) = self.capacity.checked_add(amount) else {
-            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
-        };
-
-        let Ok(new_ucap) = usize::try_from(new_cap) else {
+        let Ok(new_ucap) = usize::try_from(capacity) else {
             return Err(FlexArrErr::new(ErrorReason::UsizeOverflow));
         };
 
@@ -114,7 +102,7 @@ where
         };
 
         self.ptr = ptr.cast();
-        self.capacity = new_cap;
+        self.capacity = capacity;
         return Ok(());
     }
 
@@ -127,7 +115,7 @@ where
         let cap = self.capacity.as_usize();
         let size = lay.size() * cap;
 
-        // Safety: This does not need to bechecked since we have already
+        // Safety: This does not need to be checked since we have already
         // allocated the memory so all of these will be valid.
         let layout = unsafe { Layout::from_size_align_unchecked(size, lay.align()) };
         return Some(layout);
