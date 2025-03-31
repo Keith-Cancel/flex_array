@@ -163,14 +163,32 @@ where
     }
 
     /// Appends the slice to the end of the `FlexArr`. The type `T` must implement `Copy`.
+    /// This will try to allocate any needed memory and copy the bytes of the slice to
+    /// the end of the flex array.
+    ///
     /// If your type does not implement `Copy`, use `extend_from_slice_clone`.
+    ///
+    /// # Errors
+    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error
+    /// when determining the new capacity or length.
     pub fn extend_from_slice(&mut self, slice: &[T]) -> FlexArrResult<()>
     where
         T: Copy,
     {
-        let Ok(len) = L::try_from(slice.len()) else {
+        let slc_len = slice.len();
+        let Ok(usz_slc_len) = L::try_from(slc_len) else {
             return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
         };
+
+        let needed = self.capacity_needed(usz_slc_len)?;
+        if needed >= self.capacity() {
+            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
+        }
+
+        let usz_arr_len = self.inner.length.as_usize();
+        let ptr = unsafe { self.as_mut_ptr().add(usz_arr_len) };
+        unsafe { ptr::copy_nonoverlapping(slice.as_ptr(), ptr, slc_len) };
+
         return Ok(());
     }
 
