@@ -365,6 +365,7 @@ mod std_alloc {
     #[test]
     fn swap_remove() {
         let mut arr = FlexArr::<String>::new();
+        assert!(arr.swap_remove(0).is_none());
 
         arr.push("Hello".to_string()).unwrap();
         arr.push("There".to_string()).unwrap();
@@ -379,5 +380,25 @@ mod std_alloc {
 
         assert_eq!(arr[0], "It is a beautiful day");
         assert_eq!(arr[1], "There");
+    }
+
+    #[test]
+    fn remove() {
+        let mut arr = FlexArr::<String>::new();
+        assert!(arr.remove(0).is_none());
+
+        arr.push("Hello".to_string()).unwrap();
+        arr.push("There".to_string()).unwrap();
+        arr.push("It is a beautiful day".to_string()).unwrap();
+
+        assert_eq!(arr.len(), 3);
+        assert_eq!(arr[0], "Hello");
+        assert_eq!(arr[1], "There");
+        assert_eq!(arr[2], "It is a beautiful day");
+
+        assert_eq!(arr.remove(1).unwrap(), "There");
+
+        assert_eq!(arr[0], "Hello");
+        assert_eq!(arr[1], "It is a beautiful day");
     }
 }
