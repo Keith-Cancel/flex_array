@@ -289,7 +289,7 @@ where
     }
 
     #[inline(always)]
-    pub fn capacity_needed(&self, requested: L) -> FlexArrResult<L> {
+    fn capacity_needed(&self, requested: L) -> FlexArrResult<L> {
         let Some(needed) = self.inner.length.checked_add(requested) else {
             return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
         };
