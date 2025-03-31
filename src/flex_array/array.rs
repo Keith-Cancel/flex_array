@@ -117,6 +117,38 @@ where
         return Ok(());
     }
 
+    /// Reserves enough capacity for at least `additional` more elements to be inserted.
+    /// It may reserve more than `additional` elements. You can use this if you anticpate
+    /// how many elements need to be inserted to avoid frequent reallocations.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
+    /// determining the new capacity.
+    pub fn reserve(&mut self, additional: L) -> FlexArrResult<()> {
+        let needed = self.capacity_needed(additional)?;
+        let cap = self.capacity();
+        if self.capacity() >= needed {
+            return Ok(());
+        }
+        let min_needed = cap - needed;
+        return self.inner.expand_at_least_by(min_needed, Self::LAYOUT);
+    }
+
+    /// Appends the slice to the end of the `FlexArr`. The type `T` must implement `Copy`.
+    /// If your type does not implement `Copy`, use `extend_from_slice_clone`.
+    pub fn extend_from_slice(&mut self, slice: &[T])
+    where
+        T: Copy,
+    {
+    }
+
+    pub fn extend_from_slice_clone()
+    where
+        T: Clone,
+    {
+    }
+
     /// Returns the number of elements `FlexArr` can store without needing to reallocate.
     ///
     /// For zero sized types, this function will return the maximum value for the `LengthType`.
@@ -168,6 +200,14 @@ where
     #[inline]
     pub const fn as_mut_ptr(&self) -> *mut T {
         return self.inner.get_ptr();
+    }
+
+    #[inline(always)]
+    pub fn capacity_needed(&self, requested: L) -> FlexArrResult<L> {
+        let Some(needed) = self.inner.length.checked_add(requested) else {
+            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
+        };
+        return Ok(needed);
     }
 }
 
