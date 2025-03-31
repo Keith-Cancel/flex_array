@@ -301,4 +301,21 @@ mod std_alloc {
             assert_eq!(e.reason(), ErrorReason::LayoutFailure);
         }
     }
+
+    #[test]
+    fn add_slice() {
+        let data: [u8; 5] = [1, 2, 3, 4, 5];
+        let mut arr = FlexArr::<u8>::new();
+        assert!(arr.push(10).is_ok());
+        assert_eq!(arr.len(), 1);
+        assert!(arr.capacity() >= 1);
+
+        assert!(arr.extend_from_slice(&data).is_ok());
+        assert_eq!(arr.len(), 6);
+        assert!(arr.capacity() >= 6);
+
+        for i in 1..6 {
+            assert_eq!(arr[i], data[(i - 1) as usize]);
+        }
+    }
 }
