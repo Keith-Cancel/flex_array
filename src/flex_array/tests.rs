@@ -271,6 +271,8 @@ mod std_alloc {
         assert_eq!(there, "There");
     }
 
+    /// Note: This test assumes usize is smaller than u128
+    /// Likely, true assumption for most any architectures.
     #[test]
     fn usize_and_layout_failure() {
         let massive: u128 = (usize::MAX as u128) + 1;
@@ -334,6 +336,8 @@ mod std_alloc {
         }
     }
 
+    /// Note: This test assumes usize is smaller than u128
+    /// Likely, true assumption for most any architectures.
     #[test]
     fn massive_slice() {
         // Rust's vec allows for Zero sized types to go to
