@@ -85,9 +85,10 @@ fn array_new() {
 }
 
 #[test]
-fn no_memory() {
+fn push_fail() {
     let mut arr = FlexArr::<u32, NoAlloc>::new_in(NoAlloc);
     assert_eq!(arr.len(), 0);
+    assert_eq!(arr.capacity(), 0);
 
     // This should fail
     let ret = arr.push(0);
@@ -115,13 +116,85 @@ fn no_memory() {
     }
 }
 
+#[test]
+fn reserve_fail() {
+    let mut arr = FlexArr::<u32, NoAlloc, u8>::new_in(NoAlloc);
+    assert!(arr.reserve(0).is_ok());
+
+    let err = arr.reserve(1);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::AllocFailure);
+    }
+
+    let err = arr.reserve_exact(1);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::AllocFailure);
+    }
+
+    let err = arr.reserve_usize(1);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::AllocFailure);
+    }
+
+    let err = arr.reserve_usize(256);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::CapacityOverflow);
+    }
+}
+
 #[cfg(feature = "std_alloc")]
 mod std_alloc {
+    use core::cell::Cell;
     use std::string::String;
     use std::string::ToString;
 
     use super::*;
     use crate::types::Global;
+
+    struct AllocCount(u8, Cell<u8>);
+
+    impl AllocCount {
+        const fn new(limit: u8) -> Self {
+            return Self(limit, Cell::new(0));
+        }
+    }
+
+    unsafe impl AltAllocator for AllocCount {
+        fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
+            let cur = self.1.get();
+            if cur >= self.0 {
+                return Err(AllocError);
+            };
+            self.1.set(cur + 1);
+            return Global.allocate(layout);
+        }
+        unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
+            unsafe { Global.deallocate(ptr, layout) };
+        }
+    }
+
+    #[test]
+    fn double_reserve() {
+        let mut arr = FlexArr::<u8, AllocCount>::new_in(AllocCount::new(1));
+        assert_eq!(arr.len(), 0);
+        assert_eq!(arr.capacity(), 0);
+
+        let err = arr.reserve(1);
+        assert!(err.is_ok());
+
+        let err = arr.reserve_exact(1);
+        assert!(err.is_ok());
+
+        let err = arr.reserve_exact(1024);
+        assert!(err.is_err());
+        if let Err(e) = err {
+            assert_eq!(e.reason(), ErrorReason::AllocFailure);
+        }
+    }
 
     #[test]
     fn push_pop() {
