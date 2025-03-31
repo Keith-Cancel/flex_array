@@ -178,17 +178,10 @@ where
         T: Copy,
     {
         let slc_len = slice.len();
-        let Ok(usz_slc_len) = L::try_from(slc_len) else {
-            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
-        };
+        self.expand_by_slice_len(slc_len)?;
 
-        let needed = self.capacity_needed(usz_slc_len)?;
-        if needed >= self.capacity() {
-            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
-        }
-
-        let usz_arr_len = self.inner.length.as_usize();
-        let ptr = unsafe { self.as_mut_ptr().add(usz_arr_len) };
+        let usz_len = self.inner.length.as_usize();
+        let ptr = unsafe { self.as_mut_ptr().add(usz_len) };
         unsafe { ptr::copy_nonoverlapping(slice.as_ptr(), ptr, slc_len) };
 
         return Ok(());
@@ -259,6 +252,19 @@ where
             return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
         };
         return Ok(needed);
+    }
+
+    #[inline(always)]
+    pub fn expand_by_slice_len(&mut self, length: usize) -> FlexArrResult<()> {
+        let Ok(len) = L::try_from(length) else {
+            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
+        };
+        
+        let needed = self.capacity_needed(len)?;
+        if needed >= self.capacity() {
+            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
+        }
+        return Ok(());
     }
 }
 
