@@ -431,27 +431,40 @@ where
 
 /// # Note on Indexing
 /// Just like `[]` on rusts slices, arras and Vec, an `index >= length`
-/// will panic.
+/// will panic. This can also panic if the index value is too large to
+/// fit into a `usize`.
 impl<T, A: AltAllocator, L: LengthType> Index<L> for FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
 {
     type Output = T;
     fn index(&self, index: L) -> &Self::Output {
-        let i = index.as_usize();
+        // If the LengthType is larger than a usize
+        // the possibility that using `index as usize`
+        // will just truncate the value. The could cause
+        // the index operation on the slice to succeed
+        // when it should fail. So make sure that the
+        // index can fit into a usize before even
+        // attempting to index the slice.
+        let Ok(i) = usize::try_from(index) else {
+            panic!("Index cannot be converted to usize");
+        };
         return &self.as_slice()[i];
     }
 }
 
 /// # Note on Indexing
 /// Just like `[]` on rusts slices, arras and Vec, an `index >= length`
-/// will panic.
+/// will panic. This can also panic if the index value is too large to
+/// fit into a `usize`.
 impl<T, A: AltAllocator, L: LengthType> IndexMut<L> for FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
 {
     fn index_mut(&mut self, index: L) -> &mut Self::Output {
-        let i = index.as_usize();
+        let Ok(i) = usize::try_from(index) else {
+            panic!("Index cannot be converted to usize");
+        };
         return &mut self.as_mut_slice()[i];
     }
 }
