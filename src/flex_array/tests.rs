@@ -333,4 +333,28 @@ mod std_alloc {
             assert_eq!(e.reason(), ErrorReason::AllocFailure);
         }
     }
+
+    #[test]
+    fn massive_slice() {
+        // Rust's vec allows for Zero sized types to go to
+        // usize::MAX. Even though normally this is limited
+        // to isize::MAX.
+        let data = [(); usize::MAX];
+        let mut arr = std::vec::Vec::<()>::new();
+        assert!(arr.capacity() == usize::MAX);
+        arr.extend_from_slice(&data);
+        assert_eq!(arr.len(), usize::MAX);
+
+        // Make sure that FlexArr can behave like this for
+        // even bigger types.
+        let mut arr = FlexArr::<(), Global, u128>::new();
+        assert!(arr.capacity() == u128::MAX);
+        assert!(arr.extend_from_slice(&data).is_ok());
+        assert_eq!(arr.len(), usize::MAX as u128);
+
+        // Still should succeed even though we are beyond
+        // both usize::MAX and isize::MAX now.
+        assert!(arr.push(()).is_ok());
+        assert_eq!(arr.len(), (usize::MAX as u128) + 1);
+    }
 }
