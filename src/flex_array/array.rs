@@ -162,15 +162,17 @@ where
         return self.inner.expand_capacity_to(needed, Self::LAYOUT);
     }
 
-    /// Appends the slice to the end of the `FlexArr`. The type `T` must implement `Copy`.
-    /// This will try to allocate any needed memory and copy the bytes of the slice to
-    /// the end of the flex array.
+    /// Appends a slice of `T` elements to the end of the `FlexArr`.
     ///
-    /// If your type does not implement `Copy`, use `extend_from_slice_clone`.
+    /// This method is available for types that implement `Copy`. It reserves any necessary
+    /// additional capacity and then copies the elements from the provided slice into the array.
+    ///
+    /// If the type `T` does not implement `Copy`, consider using `extend_from_slice_clone`.
     ///
     /// # Errors
-    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error
-    /// when determining the new capacity or length.
+    ///
+    /// Returns a `FlexArrErr` if memory expansion fails or if there is an error converting
+    /// the capacity or length.
     pub fn extend_from_slice(&mut self, slice: &[T]) -> FlexArrResult<()>
     where
         T: Copy,
