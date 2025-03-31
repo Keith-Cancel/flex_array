@@ -106,15 +106,16 @@ where
             self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
         }
 
+        let old_len = self.inner.length;
         // This should always be fine to use `as` since the capacity
         // should be larger than length. So there is no need to use
         // try_from() like I was. Since the capacity would have had
         // to been converted to usize to even allocate the memory.
-        let len = self.inner.length.as_usize();
+        let usz_len = old_len.as_usize();
 
-        let loc = unsafe { self.as_mut_ptr().add(len) };
+        let loc = unsafe { self.as_mut_ptr().add(usz_len) };
         unsafe { ptr::write(loc, item) };
-        self.inner.length += L::ONE_VALUE;
+        self.inner.length = old_len + L::ONE_VALUE;
 
         return Ok(());
     }
@@ -163,10 +164,14 @@ where
 
     /// Appends the slice to the end of the `FlexArr`. The type `T` must implement `Copy`.
     /// If your type does not implement `Copy`, use `extend_from_slice_clone`.
-    pub fn extend_from_slice(&mut self, _slice: &[T])
+    pub fn extend_from_slice(&mut self, slice: &[T]) -> FlexArrResult<()>
     where
         T: Copy,
     {
+        let Ok(len) = L::try_from(slice.len()) else {
+            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
+        };
+        return Ok(());
     }
 
     pub fn extend_from_slice_clone()
