@@ -111,10 +111,18 @@ where
         // should be larger than length. So there is no need to use
         // try_from() like I was. Since the capacity would have had
         // to been converted to usize to even allocate the memory.
+        //
+        // In the event the type is a ZST and the length type can
+        // be larger than usize this is also fine, since ANYTHING
+        // added to the dangling pointer for a ZST is going to be
+        // the same Dangling pointer.
         let usz_len = old_len.as_usize();
 
         let loc = unsafe { self.as_mut_ptr().add(usz_len) };
         unsafe { ptr::write(loc, item) };
+
+        // This will always be less or equal to needed so
+        // plain addition is fine.
         self.inner.length = old_len + L::ONE_VALUE;
 
         return Ok(());
