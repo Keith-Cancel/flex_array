@@ -204,7 +204,7 @@ where
     /// This method is available for types that implement `Copy`. It reserves any necessary
     /// additional capacity and then copies the elements from the provided slice into the array.
     ///
-    /// If the type `T` does not implement `Copy`, consider using `extend_from_slice_clone`.
+    /*/// If the type `T` does not implement `Copy`, consider using `extend_from_slice_clone`.*/
     ///
     /// # Errors
     ///
