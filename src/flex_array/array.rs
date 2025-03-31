@@ -70,7 +70,7 @@ where
     /// If the allocation fails, a `FlexArrErr` is returned.
     pub fn with_capacity_in(alloc: A, capacity: L) -> FlexArrResult<Self> {
         let mut inner = Inner::new_in::<T>(alloc);
-        inner.expand_by(capacity, Self::LAYOUT)?;
+        inner.expand_capacity_to(capacity, Self::LAYOUT)?;
         return Ok(Self {
             inner: inner,
             _ph:   PhantomData,
@@ -82,7 +82,7 @@ where
     /// If the array is empty, this method returns `None`.
     pub fn pop(&mut self) -> Option<T> {
         let len = self.inner.length;
-        if len == L::ZERO_VALUE {
+        if len <= L::ZERO_VALUE {
             return None;
         }
         let ret = unsafe { ptr::read(self.as_ptr().add(len.as_usize() - 1)) };
@@ -100,13 +100,13 @@ where
     /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
     /// determining the new index.
     pub fn push(&mut self, item: T) -> FlexArrResult<()> {
-        let len = self.inner.length;
+        let needed = self.capacity_needed(L::ONE_VALUE)?;
 
-        if len >= self.capacity() {
-            self.inner.expand_at_least_by(L::ONE_VALUE, Self::LAYOUT)?;
+        if needed >= self.capacity() {
+            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
         }
 
-        let Ok(len) = usize::try_from(len) else {
+        let Ok(len) = usize::try_from(self.inner.length) else {
             return Err(FlexArrErr::new(ErrorReason::UsizeOverflow));
         };
 
@@ -130,16 +130,26 @@ where
     pub fn reserve(&mut self, additional: L) -> FlexArrResult<()> {
         let needed = self.capacity_needed(additional)?;
         let cap = self.capacity();
-        if self.capacity() >= needed {
+        if cap >= needed {
             return Ok(());
         }
-        let min_needed = cap - needed;
-        return self.inner.expand_at_least_by(min_needed, Self::LAYOUT);
+
+        return self.inner.expand_capacity_at_least(needed, Self::LAYOUT);
+    }
+
+    pub fn reserve_exact(&mut self, additional: L) -> FlexArrResult<()> {
+        let needed = self.capacity_needed(additional)?;
+        let cap = self.capacity();
+        if cap >= needed {
+            return Ok(());
+        }
+
+        return self.inner.expand_capacity_to(needed, Self::LAYOUT);
     }
 
     /// Appends the slice to the end of the `FlexArr`. The type `T` must implement `Copy`.
     /// If your type does not implement `Copy`, use `extend_from_slice_clone`.
-    pub fn extend_from_slice(&mut self, slice: &[T])
+    pub fn extend_from_slice(&mut self, _slice: &[T])
     where
         T: Copy,
     {
