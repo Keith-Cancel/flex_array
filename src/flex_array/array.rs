@@ -137,6 +137,17 @@ where
         return self.inner.expand_capacity_at_least(needed, Self::LAYOUT);
     }
 
+    /// Ensures that `FlexArr` has enough capacity to exactly `additional` more elements.
+    /// The chosen allocator may use more more memory than needed. However, You can use
+    /// this if you anticipate how many elements need to be inserted to avoid frequent
+    /// reallocations.
+    ///
+    /// If the capacity is already sufficient, this method does nothing.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FlexArrErr` if memory reallocation fails or if there is an error converting
+    /// the required capacity.
     pub fn reserve_exact(&mut self, additional: L) -> FlexArrResult<()> {
         let needed = self.capacity_needed(additional)?;
         let cap = self.capacity();
