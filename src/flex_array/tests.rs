@@ -161,6 +161,26 @@ fn reserve_fail() {
     }
 }
 
+#[test]
+fn extend_from_slice_fail() {
+    let mut arr = FlexArr::<u32, NoAlloc>::new_in(NoAlloc);
+    let err = arr.extend_from_slice(&[0u32]);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::AllocFailure);
+    }
+    let mut arr = FlexArr::<(), NoAlloc, u8>::new_in(NoAlloc);
+
+    let data = [(); 255];
+    assert!(arr.extend_from_slice(&data).is_ok());
+
+    let err = arr.extend_from_slice(&data);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::CapacityOverflow);
+    }
+}
+
 #[cfg(feature = "std_alloc")]
 mod std_alloc {
     use core::cell::Cell;
