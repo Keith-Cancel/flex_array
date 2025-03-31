@@ -137,12 +137,13 @@ where
         return self.inner.expand_capacity_at_least(needed, Self::LAYOUT);
     }
 
-    /// Ensures that `FlexArr` has enough capacity to exactly `additional` more elements.
-    /// The chosen allocator may use more more memory than needed. However, You can use
-    /// this if you anticipate how many elements need to be inserted to avoid frequent
-    /// reallocations.
+    /// Ensures that `FlexArr` has exactly enough capacity for `additional` more elements.
     ///
-    /// If the capacity is already sufficient, this method does nothing.
+    /// While the allocator may allocate slightly more memory than requested, this method
+    /// aims to match the exact required capacity. Use this when you know the exact number
+    /// of elements to be inserted to minimize wasted memory.
+    ///
+    /// If the current capacity is already sufficient, this method does nothing.
     ///
     /// # Errors
     ///
