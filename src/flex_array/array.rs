@@ -135,6 +135,14 @@ where
 
         return self.inner.expand_capacity_to(needed, Self::LAYOUT);
     }
+
+    /// Clears all elements from the `FlexArr`, dropping each element without releasing allocated memory.
+    ///
+    /// This operation resets the array’s length to zero while preserving its capacity.
+    pub fn clear(&mut self) {
+        unsafe { ptr::drop_in_place(self.as_mut_slice()) };
+        self.inner.length = L::ZERO_VALUE;
+    }
 }
 
 // Methods for working with individual items.
@@ -334,6 +342,12 @@ where
 {
     const LAYOUT: Layout = Layout::new::<T>();
     const SIZE: usize = size_of::<T>();
+
+    /// Determines if the `FlexArr` is empty.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        return self.len() == L::ZERO_VALUE;
+    }
 
     /// Returns the number of elements in the `FlexArr`.
     #[inline]
