@@ -37,6 +37,12 @@ where
     /// An implementation could be simple as:
     /// ```Self as usize```
     fn as_usize(self) -> usize;
+
+    /// Converts a `usize` to this type. This will only
+    /// be called when the value by `FlexArr``  if the value
+    /// at some point successfully used `Self::try_from(input)`
+    /// was a successful conversion.
+    fn usize_as_self(input: usize) -> Self;
     /// The same as `checked_add` for rust's built in types.
     fn checked_add(self, rhs: Self) -> Option<Self>;
     /// The same as `checked_sub` for rust's built in types.
@@ -56,6 +62,11 @@ macro_rules! impl_length_type {
             #[inline(always)]
             fn as_usize(self) -> usize {
                 return self as usize;
+            }
+
+            #[inline(always)]
+            fn usize_as_self(input: usize) -> Self {
+                return input as Self;
             }
 
             #[inline]
