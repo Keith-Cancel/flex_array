@@ -28,7 +28,7 @@ macro_rules! define_array_struct {
         /// just 16 bytes.
         ///
         /// Lastly, the allocator API is not stable yet, so this crate provides and alternate trait `AltAllocator`
-        /// that works like `Allocator` the trait and can be used with `FlexArr`
+        /// that works like `Allocator` the trait can be used with `FlexArr` to specify the allocator to use.
         #[derive(Debug)]
         pub struct FlexArr<T, A: AltAllocator $(= $global)?, L: LengthType = u32>
         where
