@@ -193,6 +193,36 @@ where
         return Ok(());
     }
 
+    /// Removes and returns the element at the specified `index` from the `FlexArr`.
+    ///
+    /// If the `index` is out of bounds, this method returns `None`.
+    ///
+    /// Note that this operation shifts all elements after `index` one position to the left,
+    /// resulting in **O(n)** time complexity.
+    ///
+    /// # Returns
+    ///
+    /// - `Some(T)` if the element at `index` was successfully removed.
+    /// - `None` if `index` is out of bounds.
+    pub fn remove(&mut self, index: L) -> Option<T> {
+        let len = self.len();
+        if index >= len {
+            return None;
+        }
+
+        let usz_len = len.as_usize();
+        let usz_ind = index.as_usize();
+        let items = usz_len - usz_ind - 1;
+
+        let loc = unsafe { self.as_mut_ptr().add(usz_ind) };
+        let src = unsafe { loc.add(1) } as *const T;
+        let item = unsafe { ptr::read(loc) };
+
+        unsafe { ptr::copy(src, loc, items) };
+
+        return Some(item);
+    }
+
     /// Removes an element from the `FlexArr` by swapping it with the last element, then popping it off.
     ///
     /// Unlike `Vec::swap_remove()`, this method returns `None` if `index` is out of bounds instead of panicking.
@@ -207,9 +237,9 @@ where
             return None;
         }
 
+        // if the check above succeeded then there is always at least one element.
         let ptr = self.as_mut_ptr();
         let loc = unsafe { ptr.add(index.as_usize()) };
-        // if the check above succeeded then there is always at least one element.
         let end = unsafe { ptr.add(self.len().as_usize() - 1) } as *const T;
         let item = unsafe { ptr::read(loc) };
         unsafe { ptr::copy(end, loc, 1) };
