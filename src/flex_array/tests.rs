@@ -144,6 +144,21 @@ fn reserve_fail() {
     if let Err(e) = err {
         assert_eq!(e.reason(), ErrorReason::CapacityOverflow);
     }
+
+    let mut arr = FlexArr::<(), NoAlloc, u8>::new_in(NoAlloc);
+    assert!(arr.push(()).is_ok());
+
+    let err = arr.reserve(255);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::CapacityOverflow);
+    }
+
+    let err = arr.reserve_exact(255);
+    assert!(err.is_err());
+    if let Err(e) = err {
+        assert_eq!(e.reason(), ErrorReason::CapacityOverflow);
+    }
 }
 
 #[cfg(feature = "std_alloc")]
