@@ -192,6 +192,31 @@ where
 
         return Ok(());
     }
+
+    /// Removes an element from the `FlexArr` by swapping it with the last element, then popping it off.
+    ///
+    /// Unlike `Vec::swap_remove()`, this method returns `None` if `index` is out of bounds instead of panicking.
+    /// This operation does not preserve the order of elements but runs in **O(1)** time.
+    ///
+    /// # Returns
+    ///
+    /// - `Some(T)` if the element at `index` was successfully removed.
+    /// - `None` if `index` is out of bounds.
+    pub fn swap_remove(&mut self, index: L) -> Option<T> {
+        if index >= self.len() {
+            return None;
+        }
+
+        let ptr = self.as_mut_ptr();
+        let loc = unsafe { ptr.add(index.as_usize()) };
+        // if the check above succeeded then there is always at least one element.
+        let end = unsafe { ptr.add(self.len().as_usize() - 1) } as *const T;
+        let item = unsafe { ptr::read(loc) };
+        unsafe { ptr::copy(end, loc, 1) };
+
+        self.inner.length = self.len() - L::ONE_VALUE;
+        return Some(item);
+    }
 }
 
 // Methods for working with or getting slices.
@@ -357,6 +382,11 @@ where
     }
 }
 
+// Trait implementations.
+
+/// # Note on Indexing
+/// Just like `[]` on rusts slices, arras and Vec, an `index >= length`
+/// will panic.
 impl<T, A: AltAllocator, L: LengthType> Index<L> for FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
@@ -368,6 +398,9 @@ where
     }
 }
 
+/// # Note on Indexing
+/// Just like `[]` on rusts slices, arras and Vec, an `index >= length`
+/// will panic.
 impl<T, A: AltAllocator, L: LengthType> IndexMut<L> for FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
