@@ -404,12 +404,13 @@ mod std_alloc {
 
     #[test]
     fn clear() {
-        let mut arr = FlexArr::<String>::new();
+        let mut arr = FlexArr::<String, Global, u8>::new();
         assert!(arr.is_empty());
 
         arr.push("Hello".to_string()).unwrap();
         arr.push("There".to_string()).unwrap();
         arr.push("It is a beautiful day".to_string()).unwrap();
+        let cap = arr.capacity();
 
         assert_eq!(arr.len(), 3);
         assert_eq!(arr[0], "Hello");
@@ -420,5 +421,6 @@ mod std_alloc {
 
         assert!(arr.is_empty());
         assert_eq!(arr.len(), 0);
+        assert_eq!(arr.capacity(), cap);
     }
 }
