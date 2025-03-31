@@ -49,6 +49,8 @@ where
     fn checked_sub(self, rhs: Self) -> Option<Self>;
     /// The same as `checked_mul` for rust's built in types.
     fn checked_mul(self, rhs: Self) -> Option<Self>;
+    /// The same as `wrapping_add` for rust's built in types.
+    fn wrapping_add(self, rhs: Self) -> Self;
 }
 
 macro_rules! impl_length_type {
@@ -68,13 +70,20 @@ macro_rules! impl_length_type {
             fn checked_add(self, rhs: Self) -> Option<Self> {
                 return self.checked_add(rhs);
             }
+
             #[inline]
             fn checked_sub(self, rhs: Self) -> Option<Self> {
                 return self.checked_sub(rhs);
             }
+
             #[inline]
             fn checked_mul(self, rhs: Self) -> Option<Self> {
                 return self.checked_mul(rhs);
+            }
+
+            #[inline(always)]
+            fn wrapping_add(self, rhs: Self) -> Self {
+                return self.wrapping_add(rhs);
             }
         }
     };
