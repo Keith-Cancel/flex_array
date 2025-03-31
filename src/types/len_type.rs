@@ -11,12 +11,12 @@ use core::ops;
 pub unsafe trait LengthType
 where
     Self: Copy,
+    Self: Sized,
     Self: cmp::Eq,
     Self: cmp::Ord,
     Self: ops::Add<Output = Self>,
     Self: ops::Shr<Output = Self>,
     Self: ops::Sub<Output = Self>,
-    Self: Sized,
     Self: From<u8>,
     Self: TryFrom<usize>,
     usize: TryFrom<Self>,
