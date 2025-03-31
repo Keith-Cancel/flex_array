@@ -46,13 +46,11 @@ define_array_struct!(Global);
 #[cfg(not(feature = "std_alloc"))]
 define_array_struct!();
 
+// Creation and Reservation methods.
 impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
 where
     usize: TryFrom<L>,
 {
-    const LAYOUT: Layout = Layout::new::<T>();
-    const SIZE: usize = size_of::<T>();
-
     /// Constructs a new, empty `FlexArr` using the given allocator.
     ///
     /// This function initializes the array without performing any memory allocation. The resulting
@@ -75,57 +73,6 @@ where
             inner: inner,
             _ph:   PhantomData,
         });
-    }
-
-    /// Removes and returns the last element from the `FlexArr`.
-    ///
-    /// If the array is empty, this method returns `None`.
-    pub fn pop(&mut self) -> Option<T> {
-        let len = self.inner.length;
-        if len <= L::ZERO_VALUE {
-            return None;
-        }
-        let ret = unsafe { ptr::read(self.as_ptr().add(len.as_usize() - 1)) };
-        self.inner.length = len - L::ONE_VALUE;
-        return Some(ret);
-    }
-
-    /// Appends an element to the end of the `FlexArr`.
-    ///
-    /// If there isn’t enough capacity, this method attempts to expand the underlying storage.
-    /// Should the allocation fail, a `FlexArrErr` is returned.
-    ///
-    /// # Errors
-    ///
-    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
-    /// determining the new index.
-    pub fn push(&mut self, item: T) -> FlexArrResult<()> {
-        let needed = self.capacity_needed(L::ONE_VALUE)?;
-
-        if needed > self.capacity() {
-            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
-        }
-
-        let old_len = self.inner.length;
-        // This should always be fine to use `as` since the capacity
-        // should be larger than length. So there is no need to use
-        // try_from() like I was. Since the capacity would have had
-        // to been converted to usize to even allocate the memory.
-        //
-        // In the event the type is a ZST and the length type can
-        // be larger than usize this is also fine, since ANYTHING
-        // added to the dangling pointer for a ZST is going to be
-        // the same Dangling pointer.
-        let usz_len = old_len.as_usize();
-
-        let loc = unsafe { self.as_mut_ptr().add(usz_len) };
-        unsafe { ptr::write(loc, item) };
-
-        // This will always be less or equal to needed so
-        // plain addition is fine.
-        self.inner.length = old_len + L::ONE_VALUE;
-
-        return Ok(());
     }
 
     /// Ensures that `FlexArr` has enough capacity to store at least `additional` more elements.
@@ -188,7 +135,70 @@ where
 
         return self.inner.expand_capacity_to(needed, Self::LAYOUT);
     }
+}
 
+// Methods for working with individual items.
+impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    /// Removes and returns the last element from the `FlexArr`.
+    ///
+    /// If the array is empty, this method returns `None`.
+    pub fn pop(&mut self) -> Option<T> {
+        let len = self.inner.length;
+        if len <= L::ZERO_VALUE {
+            return None;
+        }
+        let ret = unsafe { ptr::read(self.as_ptr().add(len.as_usize() - 1)) };
+        self.inner.length = len - L::ONE_VALUE;
+        return Some(ret);
+    }
+
+    /// Appends an element to the end of the `FlexArr`.
+    ///
+    /// If there isn’t enough capacity, this method attempts to expand the underlying storage.
+    /// Should the allocation fail, a `FlexArrErr` is returned.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
+    /// determining the new index.
+    pub fn push(&mut self, item: T) -> FlexArrResult<()> {
+        let needed = self.capacity_needed(L::ONE_VALUE)?;
+
+        if needed > self.capacity() {
+            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
+        }
+
+        let old_len = self.inner.length;
+        // This should always be fine to use `as` since the capacity
+        // should be larger than length. So there is no need to use
+        // try_from() like I was. Since the capacity would have had
+        // to been converted to usize to even allocate the memory.
+        //
+        // In the event the type is a ZST and the length type can
+        // be larger than usize this is also fine, since ANYTHING
+        // added to the dangling pointer for a ZST is going to be
+        // the same Dangling pointer.
+        let usz_len = old_len.as_usize();
+
+        let loc = unsafe { self.as_mut_ptr().add(usz_len) };
+        unsafe { ptr::write(loc, item) };
+
+        // This will always be less or equal to needed so
+        // plain addition is fine.
+        self.inner.length = old_len + L::ONE_VALUE;
+
+        return Ok(());
+    }
+}
+
+// Methods for working with or getting slices.
+impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
     /// Appends a slice of `T` elements to the end of the `FlexArr`.
     ///
     /// This method is available for types that implement `Copy`. It reserves any necessary
@@ -244,19 +254,6 @@ where
         }
     */
 
-    /// Returns the number of elements `FlexArr` can store without needing to reallocate.
-    ///
-    /// For zero sized types, this function will return the maximum value for the `LengthType`.
-    pub const fn capacity(&self) -> L {
-        return self.inner.capacity(Self::SIZE);
-    }
-
-    /// Returns the number of elements in the `FlexArr`.
-    #[inline]
-    pub const fn len(&self) -> L {
-        return self.inner.length;
-    }
-
     /// Returns a reference to the underlying storage as a slice.
     /// Unfortunately, since a `slice` is a built in type, the indexing operations
     /// on it will be a `usize`.
@@ -271,6 +268,28 @@ where
     #[inline]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         unsafe { slice::from_raw_parts_mut(self.as_mut_ptr(), self.inner.length.as_usize()) }
+    }
+}
+
+// Pretty much attribute methods and constants.
+impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    const LAYOUT: Layout = Layout::new::<T>();
+    const SIZE: usize = size_of::<T>();
+
+    /// Returns the number of elements in the `FlexArr`.
+    #[inline]
+    pub const fn len(&self) -> L {
+        return self.inner.length;
+    }
+
+    /// Returns the number of elements `FlexArr` can store without needing to reallocate.
+    ///
+    /// For zero sized types, this function will return the maximum value for the `LengthType`.
+    pub const fn capacity(&self) -> L {
+        return self.inner.capacity(Self::SIZE);
     }
 
     /// Returns a raw pointer to the underlying storage. If the type is zero sized
@@ -296,7 +315,13 @@ where
     pub const fn as_mut_ptr(&self) -> *mut T {
         return self.inner.get_ptr();
     }
+}
 
+// Non-public helper methods.
+impl<T, A: AltAllocator, L: LengthType> FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
     #[inline(always)]
     fn capacity_needed(&self, requested: L) -> FlexArrResult<L> {
         let Some(needed) = self.inner.length.checked_add(requested) else {
