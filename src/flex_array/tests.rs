@@ -361,4 +361,23 @@ mod std_alloc {
         assert!(arr.push(()).is_ok());
         assert_eq!(arr.len(), (usize::MAX as u128) + 1);
     }
+
+    #[test]
+    fn swap_remove() {
+        let mut arr = FlexArr::<String>::new();
+
+        arr.push("Hello".to_string()).unwrap();
+        arr.push("There".to_string()).unwrap();
+        arr.push("It is a beautiful day".to_string()).unwrap();
+
+        assert_eq!(arr.len(), 3);
+        assert_eq!(arr[0], "Hello");
+        assert_eq!(arr[1], "There");
+        assert_eq!(arr[2], "It is a beautiful day");
+
+        assert_eq!(arr.swap_remove(0).unwrap(), "Hello");
+
+        assert_eq!(arr[0], "It is a beautiful day");
+        assert_eq!(arr[1], "There");
+    }
 }
