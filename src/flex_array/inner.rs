@@ -76,11 +76,11 @@ where
             return Ok(());
         }
 
-        let Ok(new_ucap) = usize::try_from(capacity) else {
+        let Ok(usz_cap) = usize::try_from(capacity) else {
             return Err(FlexArrErr::new(ErrorReason::UsizeOverflow));
         };
 
-        let new_layout = layout_array(layout, new_ucap)?;
+        let new_layout = layout_array(layout, usz_cap)?;
 
         // Safety: rust is pretty adamant about sizes not being over isize::MAX
         if new_layout.size() > (isize::MAX as usize) {
