@@ -130,6 +130,7 @@ where
     ///
     /// Returns a `FlexArrErr` if memory reallocation fails or if there is an error converting
     /// the required capacity.
+    #[inline]
     pub fn reserve(&mut self, additional: L) -> FlexArrResult<()> {
         let needed = self.capacity_needed(additional)?;
         let cap = self.capacity();
@@ -138,6 +139,24 @@ where
         }
 
         return self.inner.expand_capacity_at_least(needed, Self::LAYOUT);
+    }
+
+    /// Ensures that `FlexArr` can store at least `additional` more elements,
+    /// with the capacity specified as a `usize`.
+    ///
+    /// This method works the same as `self.reserve()`, but it accepts a `usize`
+    /// for convenience. It attempts to convert the value to the `LengthType`
+    /// and reserves the necessary capacity.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FlexArrErr` on type conversion, overflow or if memory reallocation fails.
+    #[inline]
+    pub fn reserve_usize(&mut self, additional: usize) -> FlexArrResult<()> {
+        let Ok(add) = L::try_from(additional) else {
+            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
+        };
+        return self.reserve(add);
     }
 
     /// Ensures that `FlexArr` has exactly enough capacity for `additional` more elements.
@@ -178,7 +197,7 @@ where
         T: Copy,
     {
         let slc_len = slice.len();
-        self.expand_by_slice_len(slc_len)?;
+        self.reserve_usize(slc_len)?;
 
         let usz_len = self.inner.length.as_usize();
         let ptr = unsafe { self.as_mut_ptr().add(usz_len) };
@@ -275,19 +294,6 @@ where
             return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
         };
         return Ok(needed);
-    }
-
-    #[inline(always)]
-    pub fn expand_by_slice_len(&mut self, length: usize) -> FlexArrResult<()> {
-        let Ok(len) = L::try_from(length) else {
-            return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
-        };
-
-        let needed = self.capacity_needed(len)?;
-        if needed >= self.capacity() {
-            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
-        }
-        return Ok(());
     }
 }
 
