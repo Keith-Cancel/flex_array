@@ -314,8 +314,23 @@ mod std_alloc {
         assert_eq!(arr.len(), 6);
         assert!(arr.capacity() >= 6);
 
+        assert_eq!(arr[0], 10);
         for i in 1..6 {
             assert_eq!(arr[i], data[(i - 1) as usize]);
+        }
+
+        let mut arr = FlexArr::<u8, AllocCount>::new_in(AllocCount::new(1));
+        assert!(arr.reserve_exact(1).is_ok());
+        assert!(arr.capacity() == 1);
+
+        assert!(arr.push(10).is_ok());
+        assert_eq!(arr.len(), 1);
+        assert!(arr.capacity() == 1);
+
+        let ret = arr.extend_from_slice(&data);
+        assert!(ret.is_err());
+        if let Err(e) = ret {
+            assert_eq!(e.reason(), ErrorReason::AllocFailure);
         }
     }
 }
