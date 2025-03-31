@@ -102,7 +102,7 @@ where
     pub fn push(&mut self, item: T) -> FlexArrResult<()> {
         let needed = self.capacity_needed(L::ONE_VALUE)?;
 
-        if needed >= self.capacity() {
+        if needed > self.capacity() {
             self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
         }
 
