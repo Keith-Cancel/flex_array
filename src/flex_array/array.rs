@@ -203,6 +203,7 @@ where
         let ptr = unsafe { self.as_mut_ptr().add(usz_len) };
         unsafe { ptr::copy_nonoverlapping(slice.as_ptr(), ptr, slc_len) };
 
+        self.inner.length = L::usize_as_self(slc_len + usz_len);
         return Ok(());
     }
     /*
