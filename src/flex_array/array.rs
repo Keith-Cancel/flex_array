@@ -220,6 +220,7 @@ where
 
         unsafe { ptr::copy(src, loc, items) };
 
+        self.inner.length = self.len() - L::ONE_VALUE;
         return Some(item);
     }
 
