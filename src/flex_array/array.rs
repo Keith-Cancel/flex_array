@@ -106,9 +106,11 @@ where
             self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
         }
 
-        let Ok(len) = usize::try_from(self.inner.length) else {
-            return Err(FlexArrErr::new(ErrorReason::UsizeOverflow));
-        };
+        // This should always be fine to use `as` since the capacity
+        // should be larger than length. So there is no need to use
+        // try_from() like I was. Since the capacity would have had
+        // to been converted to usize to even allocate the memory.
+        let len = self.inner.length.as_usize();
 
         let loc = unsafe { self.as_mut_ptr().add(len) };
         unsafe { ptr::write(loc, item) };
