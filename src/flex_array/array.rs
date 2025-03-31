@@ -117,14 +117,16 @@ where
         return Ok(());
     }
 
-    /// Reserves enough capacity for at least `additional` more elements to be inserted.
-    /// It may reserve more than `additional` elements. You can use this if you anticpate
+    /// Ensures that `FlexArr` has enough capacity to store at least `additional` more elements.
+    /// It may reserve more than `additional` elements. You can use this if you anticipate
     /// how many elements need to be inserted to avoid frequent reallocations.
+    ///
+    /// If the capacity is already sufficient, this method does nothing.
     ///
     /// # Errors
     ///
-    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
-    /// determining the new capacity.
+    /// Returns a `FlexArrErr` if memory reallocation fails or if there is an error converting
+    /// the required capacity.
     pub fn reserve(&mut self, additional: L) -> FlexArrResult<()> {
         let needed = self.capacity_needed(additional)?;
         let cap = self.capacity();
