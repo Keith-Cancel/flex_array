@@ -186,12 +186,35 @@ where
 
         return Ok(());
     }
+    /*
+        Comment this out for now since while a type that implements Clone may
+        not always allocate memory, if it does there is no way to get the
+        status of the allocation failure. Perhaps a different trait that users
+        can implement.
 
-    pub fn extend_from_slice_clone()
-    where
-        T: Clone,
-    {
-    }
+        pub fn extend_from_slice_clone(&mut self, slice: &[T]) -> FlexArrResult<()>
+        where
+            T: Clone,
+        {
+            let slc_len = slice.len();
+            self.expand_by_slice_len(slc_len)?;
+
+            let usz_len = self.inner.length.as_usize();
+            let mut arr_ptr = unsafe { self.as_mut_ptr().add(usz_len) };
+            let mut slc_ptr = slice.as_ptr();
+            let slc_end = unsafe { slice.as_ptr().add(slc_len) };
+
+            while slc_ptr < slc_end {
+                // Hmm if clone allocates memory it may panic...
+                let cloned = unsafe { (*slc_ptr).clone() };
+                unsafe { ptr::write(arr_ptr, cloned) };
+                arr_ptr = unsafe { arr_ptr.add(1) };
+                slc_ptr = unsafe { slc_ptr.add(1) };
+            }
+
+            return Ok(());
+        }
+    */
 
     /// Returns the number of elements `FlexArr` can store without needing to reallocate.
     ///
@@ -259,7 +282,7 @@ where
         let Ok(len) = L::try_from(length) else {
             return Err(FlexArrErr::new(ErrorReason::CapacityOverflow));
         };
-        
+
         let needed = self.capacity_needed(len)?;
         if needed >= self.capacity() {
             self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
