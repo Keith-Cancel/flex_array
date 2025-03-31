@@ -63,7 +63,7 @@ where
         // Increase the capacity by 50%
         // Also don't care if this overflows. Max ensures that will
         // at least get the capacity needed.
-        let new_cap = old_cap + (old_cap >> L::ONE_VALUE);
+        let new_cap = old_cap.wrapping_add(old_cap >> L::ONE_VALUE);
         let new_cap = new_cap.max(capacity);
         let new_cap = new_cap.max(L::from(8u8));
 
