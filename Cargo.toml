@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Keith Cancel <admin@keith.pro>"]
 description = "A `#[no_std]` flexible array much like std::Vec but with custom indices and length and capacity types."
+keywords = ["no_std", "vec", "vector", "array"]
+categories = ["data-structures", "no-std"]
+readme = "README.md"
+repository = "https://github.com/Keith-Cancel/flex_array"
+license = "MIT"
+
+[package.metadata.docs.rs]
+features = ["std_alloc"]
 
 [dependencies]
 
