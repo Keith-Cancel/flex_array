@@ -423,4 +423,28 @@ mod std_alloc {
         assert_eq!(arr.len(), 0);
         assert_eq!(arr.capacity(), cap);
     }
+
+    #[test]
+    fn truncate() {
+        let mut arr = FlexArr::<String, Global, u8>::new();
+
+        arr.push("Hello".to_string()).unwrap();
+        arr.push("There".to_string()).unwrap();
+        arr.push("It is a beautiful day".to_string()).unwrap();
+        let cap = arr.capacity();
+
+        assert_eq!(arr.len(), 3);
+        assert_eq!(arr[0], "Hello");
+        assert_eq!(arr[1], "There");
+        assert_eq!(arr[2], "It is a beautiful day");
+
+        arr.truncate(1);
+
+        assert_eq!(arr.capacity(), cap);
+        assert_eq!(arr.len(), 1);
+        assert_eq!(arr[0], "Hello");
+
+        arr.truncate(2);
+        assert_eq!(arr.len(), 1);
+    }
 }
