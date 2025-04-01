@@ -64,9 +64,7 @@ fn main() {
 
 ## Feedback and Contributions
 
-If you have any feedback or suggestions for improvement, please open an issue or submit a pull request. Especially if have noticed any bugs or soundness issues, please report them. To make `Vec` equivalent does
-require unsafe code. I have ran it through Miri and my tests cases should have caught any issues, but that is
-not a guarantee. So please report any issues you find.
+I welcome any feedback and contributions! If you have suggestions for improvements, encounter any bugs, or discover potential soundness issues, please open an issue or submit a pull request. Although I've run tests and used Miri to check for issues. The unsafe code required to get a `Vec` like container while supporting multiple allocators means if you find any soundness issues please let me know so it can be dealt with promptly. Any input is kindly appreciated to ensure the quality and reliability of this crate.
 
 ## License
  * MIT license
