@@ -144,8 +144,9 @@ where
         self.inner.length = L::ZERO_VALUE;
     }
 
-    // Truncates `FlexArr` to the specified length. All elements current past the length will be dropped.
-    // If the length is greater than the current length nothing happens.
+    /// Reduces the length of the `FlexArr` to the specified value, dropping all elements beyond that point.
+    ///
+    /// If the provided `length` is greater than or equal to the current length, the method does nothing.
     pub fn truncate(&mut self, length: L) {
         let len = self.len();
         if length >= len {
