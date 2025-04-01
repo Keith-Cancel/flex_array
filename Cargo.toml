@@ -14,8 +14,10 @@ license = "MIT"
 features = ["std_alloc"]
 
 [dependencies]
+allocator-api2 = { version = "0.2.21", optional = true }
 
 [features]
 default = []
 experimental_allocator = []
 std_alloc = []
+allocator_api2 = ["dep:allocator-api2"]
