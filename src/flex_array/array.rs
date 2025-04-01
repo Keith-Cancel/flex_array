@@ -143,6 +143,23 @@ where
         unsafe { ptr::drop_in_place(self.as_mut_slice()) };
         self.inner.length = L::ZERO_VALUE;
     }
+
+    // Truncates `FlexArr` to the specified length. All elements current past the length will be dropped.
+    // If the length is greater than the current length nothing happens.
+    pub fn truncate(&mut self, length: L) {
+        let len = self.len();
+        if length >= len {
+            return;
+        }
+        let left_over = (len - length).as_usize();
+        let usz = length.as_usize();
+
+        let loc = unsafe { self.as_mut_ptr().add(usz) };
+        let slc = unsafe { slice::from_raw_parts_mut(loc, left_over) };
+        unsafe { ptr::drop_in_place(slc) };
+
+        self.inner.length = length;
+    }
 }
 
 // Methods for working with individual items.
