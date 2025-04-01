@@ -33,7 +33,7 @@ I created `FlexArr` to address some of the limitations inherent in Rust’s stan
 
 ## Getting Started
 
-Add `flex_array` to your `Cargo.toml`
+Add `flex_array` to your `Cargo.toml`. If you want to enable the std allocator enable the `std_alloc` feature.
 ```toml
 [dependencies]
 flex_array = "0.1.0"
@@ -45,9 +45,9 @@ use flex_array::FlexArr;
 fn main() {
     // FlexArr with u32 length/capacity and if using the std allocator.
     let mut array: FlexArr<i32> = FlexArr::new();
-
-    // Create an empty FlexArr with a custom allocator and a u32 for length/capacity.
-    let mut array: FlexArr<i32, YourAllocator, u32> = FlexArr::new_in(your_allocator);
+    // Or
+    // Create an empty FlexArr with a custom allocator and a u16 for length/capacity.
+    let mut array: FlexArr<i32, YourAllocator, u16> = FlexArr::new_in(your_allocator);
 
     // Reserve capacity for 100 elements.
     array.reserve(100).expect("Failed to allocate memory");
