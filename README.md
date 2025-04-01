@@ -68,4 +68,4 @@ I welcome any feedback and contributions! If you have suggestions for improvemen
 
 ## License
  * MIT license
-   ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+   ([LICENSE-MIT](LICENSE-MIT))
