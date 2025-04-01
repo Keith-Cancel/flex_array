@@ -274,6 +274,70 @@ where
         self.inner.length = self.len() - L::ONE_VALUE;
         return Some(item);
     }
+
+    /// Returns a reference to the element at the specified `index`,
+    /// or `None` if the index is out of bounds.
+    ///
+    /// Note that this method only supports single-element access, not
+    /// ranges. Extending to range-based access would require a custom
+    /// trait since Rust's `SliceIndex` trait is sealed
+    pub fn get(&self, index: L) -> Option<&T> {
+        let len = self.len();
+        if index >= len {
+            return None;
+        }
+        return Some(self.get_unchecked(index));
+    }
+
+    /// Returns a reference to the element at the specified `index`
+    /// without performing any bounds checking.
+    ///
+    /// This method behaves like `get()`, but skips the bounds check.
+    /// It is marked as `unsafe` because providing an out-of-bounds
+    /// index will result in undefined behavior.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `index` is within bounds.
+    #[inline]
+    pub fn get_unchecked(&self, index: L) -> &T {
+        let usz_ind = index.as_usize();
+        let loc = unsafe { self.as_ptr().add(usz_ind) };
+        let refr = unsafe { &*loc };
+        return refr;
+    }
+
+    /// Returns a reference to the element at the specified `index`,
+    /// or `None` if the index is out of bounds.
+    ///
+    /// Note that this method only supports single-element access, not
+    /// ranges. Extending to range-based access would require a custom
+    /// trait since Rust's `SliceIndex` trait is sealed
+    pub fn get_mut(&mut self, index: L) -> Option<&mut T> {
+        let len = self.len();
+        if index >= len {
+            return None;
+        }
+        return Some(self.get_mut_unchecked(index));
+    }
+
+    /// Returns a mutable reference to the element at the specified `index`
+    /// without performing any bounds checking.
+    ///
+    /// This method behaves like `get()`, but skips the bounds check.
+    /// It is marked as `unsafe` because providing an out-of-bounds
+    /// index will result in undefined behavior.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `index` is within bounds.
+    #[inline]
+    pub fn get_mut_unchecked(&mut self, index: L) -> &mut T {
+        let usz_ind = index.as_usize();
+        let loc = unsafe { self.as_mut_ptr().add(usz_ind) };
+        let refr = unsafe { &mut *loc };
+        return refr;
+    }
 }
 
 // Methods for working with or getting slices.
