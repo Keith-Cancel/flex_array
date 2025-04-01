@@ -244,9 +244,16 @@ mod std_alloc {
         assert_eq!(arr.len(), 4);
 
         assert_eq!(arr[0u32], 0xc);
+        assert_eq!(arr.get(0), Some(&0xcu8));
+        assert_eq!(arr.get_mut(0), Some(&mut 0xcu8));
         assert_eq!(arr[1u32], 0xa);
+        assert_eq!(arr.get(1), Some(&0xau8));
         assert_eq!(arr[2u32], 0xf);
+        assert_eq!(arr.get(2), Some(&0xfu8));
         assert_eq!(arr[3u32], 0xe);
+        assert_eq!(arr.get(3), Some(&0xeu8));
+        assert_eq!(arr.get(4), None);
+        assert_eq!(arr.get_mut(4), None);
 
         assert_eq!(arr.pop().unwrap(), 0xeu8);
 
@@ -363,6 +370,36 @@ mod std_alloc {
     }
 
     #[test]
+    #[should_panic]
+    fn massive_index_failure1() {
+        let data = [(); usize::MAX];
+        let mut arr = FlexArr::<(), Global, u128>::new();
+        assert!(arr.capacity() == u128::MAX);
+
+        assert!(arr.extend_from_slice(&data).is_ok());
+        assert!(arr.push(()).is_ok());
+        assert!(arr.push(()).is_ok());
+
+        let index = usize::MAX as u128 + 1;
+        let _ = arr[index];
+    }
+
+    #[test]
+    #[should_panic]
+    fn massive_index_failure2() {
+        let data = [(); usize::MAX];
+        let mut arr = FlexArr::<(), Global, u128>::new();
+        assert!(arr.capacity() == u128::MAX);
+
+        assert!(arr.extend_from_slice(&data).is_ok());
+        assert!(arr.push(()).is_ok());
+        assert!(arr.push(()).is_ok());
+
+        let index = usize::MAX as u128 + 1;
+        arr[index] = ();
+    }
+
+    #[test]
     fn swap_remove() {
         let mut arr = FlexArr::<String>::new();
         assert!(arr.swap_remove(0).is_none());
@@ -446,5 +483,39 @@ mod std_alloc {
 
         arr.truncate(2);
         assert_eq!(arr.len(), 1);
+    }
+
+    #[test]
+    fn slice_method_ref() {
+        let mut arr = FlexArr::<u8>::new();
+
+        arr.push(0x2).unwrap();
+        arr.push(0x3).unwrap();
+        arr.push(0x6).unwrap();
+        arr.push(0x0).unwrap();
+        arr.push(0x5).unwrap();
+        arr.push(0x4).unwrap();
+        arr.push(0x1).unwrap();
+
+        assert_eq!(*arr.last().unwrap(), 0x01);
+    }
+
+    #[test]
+    fn slice_method_mut() {
+        let mut arr = FlexArr::<u8>::new();
+
+        arr.push(0x2).unwrap();
+        arr.push(0x3).unwrap();
+        arr.push(0x6).unwrap();
+        arr.push(0x0).unwrap();
+        arr.push(0x5).unwrap();
+        arr.push(0x4).unwrap();
+        arr.push(0x1).unwrap();
+
+        arr.sort();
+
+        for i in 0..arr.len() {
+            assert_eq!(arr[i], i as u8);
+        }
     }
 }
