@@ -498,3 +498,25 @@ where
         }
     }
 }
+
+impl<T, A: AltAllocator, L: LengthType> core::ops::Deref for FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    type Target = [T];
+
+    #[inline]
+    fn deref(&self) -> &[T] {
+        return self.as_slice();
+    }
+}
+
+impl<T, A: AltAllocator, L: LengthType> core::ops::DerefMut for FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    #[inline]
+    fn deref_mut(&mut self) -> &mut [T] {
+        return self.as_mut_slice();
+    }
+}
