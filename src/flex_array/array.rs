@@ -6,12 +6,12 @@ use core::ptr;
 use core::slice;
 
 use super::inner::Inner;
-use crate::types::AltAllocator;
+use crate::alloc::AltAllocator;
+#[cfg(feature = "std_alloc")]
+use crate::alloc::Global;
 use crate::types::ErrorReason;
 use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
-#[cfg(feature = "std_alloc")]
-use crate::types::Global;
 use crate::types::LengthType;
 
 macro_rules! define_array_struct {

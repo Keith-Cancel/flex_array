@@ -1,12 +1,12 @@
 use core::alloc::Layout;
 use core::ptr::NonNull;
 
-use crate::types::AltAllocator;
+use crate::alloc::AltAllocator;
+#[cfg(feature = "std_alloc")]
+use crate::alloc::Global;
 use crate::types::ErrorReason;
 use crate::types::FlexArrErr;
 use crate::types::FlexArrResult;
-#[cfg(feature = "std_alloc")]
-use crate::types::Global;
 use crate::types::LengthType;
 
 const fn layout_array(layout: Layout, length: usize) -> FlexArrResult<Layout> {

@@ -6,8 +6,8 @@ use core::ptr::dangling_mut;
 
 use super::FlexArr;
 use super::inner::Inner;
-use crate::types::AllocError;
-use crate::types::AltAllocator;
+use crate::alloc::AllocError;
+use crate::alloc::AltAllocator;
 use crate::types::ErrorReason;
 
 struct NoAlloc;
@@ -188,7 +188,7 @@ mod std_alloc {
     use std::string::ToString;
 
     use super::*;
-    use crate::types::Global;
+    use crate::alloc::Global;
 
     struct AllocCount(u8, Cell<u8>);
 
