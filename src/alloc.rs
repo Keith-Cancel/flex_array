@@ -4,6 +4,8 @@ mod std_alloc;
 
 #[cfg(feature = "experimental_allocator")]
 pub use core::alloc::AllocError;
+use core::error::Error;
+use core::fmt;
 
 pub use alt_alloc::AltAllocator;
 #[cfg(feature = "std_alloc")]

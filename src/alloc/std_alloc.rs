@@ -13,8 +13,8 @@ mod alloc_def {
     use std::alloc;
     use std::alloc::Layout;
 
-    use crate::types::AllocError;
-    use crate::types::AltAllocator;
+    use crate::alloc::AllocError;
+    use crate::alloc::AltAllocator;
 
     /// This is basically a wrapper around the std global allocator APIs.
     ///
