@@ -1,12 +1,12 @@
-//! Contains mainly traits used by `FlexArr` The important types are the `LengthType`
-//! trait and the `AltAllocator` trait.
+//! Contains types that are use by `FlexArr` The important types are the `LengthType`
+//! and `FlexArrErr`.
 //!
-//! If the `experimental_allocator` feature is enabled, the `AltAllocator`
-//! trait is implemented for types that implement the allocator api `Allocator` trait.
+//! `LengthType` is a trait that is used for letting you specify the type of the length,
+//! capacity, and indexing operations.
 //!
-//! If built with the `std_alloc` feature, a wrapper called `Global` is also
-//! provided. Further, if the `experimental_allocator` feature is enabled,
-//! the allocator APIs `Global` is re-exported instead.
+//! `FlexArrErr` is type that that used to indicate an error during a `FlexArr` operation.
+//!
+//! `FlexArrResult` is a type alias for `Result<T, FlexArrErr>`
 mod errors;
 mod len_type;
 
