@@ -34,6 +34,7 @@
 #[cfg(any(feature = "std_alloc", test))]
 extern crate std;
 
+pub mod alloc;
 mod flex_array;
 pub mod types;
 
