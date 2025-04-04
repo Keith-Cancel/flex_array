@@ -28,6 +28,16 @@
 //! - `experimental_allocator` – Enables support for Rust’s unstable `Allocator` trait for custom
 //!   allocators. When used with `std_alloc`, this re-exports the `Global` type from `std` instead
 //!   of the custom wrapper named `Global`.
+//!
+//! - `alloc_api2`
+//!   Enables support for the `allocator-api2` crate, which also provides an `Allocator` trait
+//!   in stable rust. This way if you already have allocators written against this you can use
+//!   them with the `flex_array` crate.
+//!   **Note:** This feature should not be enabled with `experimental_allocator` feature. If
+//!   you want to use both just able to enable `experimental_allocator` and `nightly` in the
+//!   `allocator-api2` crate. Additionally, if you are using the `nightly` feature of the
+//!  `allocator-api2` crate you will need to enable the `experimental_allocator` feature.
+
 #![no_std]
 #![cfg_attr(feature = "experimental_allocator", feature(allocator_api))]
 
