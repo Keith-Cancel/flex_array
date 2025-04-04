@@ -8,6 +8,8 @@
 //! provided. Further, if the `experimental_allocator` feature is enabled,
 //! the allocator APIs `Global` is re-exported instead.
 
+#[cfg(feature = "experimental_allocator")]
+mod alloc_unstable;
 mod alt_alloc;
 #[cfg(feature = "std_alloc")]
 mod std_alloc;
