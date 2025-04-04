@@ -31,23 +31,50 @@ I created `FlexArr` to address some of the limitations inherent in Rust’s stan
 - **`experimental_allocator`**
   Enables support for Rust’s unstable `Allocator` trait for custom memory allocators. When used in conjunction with `std_alloc`, this feature re-exports the `Global` type directly from the `std` crate rather than using the custom `Global` wrapper provided by `flex_array`.
 
-## Getting Started
+- **`alloc_api2`**
+  Enables support for the `allocator-api2` crate, which also provides an `Allocator` trait in stable rust. This way if you already have allocators written against this you can use them with the `flex_array` crate.
+  **Note:** This feature should not be enabled with `experimental_allocator` feature. If you want to use both
+  just able to enable `experimental_allocator` and `nightly` in the `allocator-api2` crate. Additionally, if you
+  are using the `nightly` feature of the `allocator-api2` crate you will need to enable the `experimental_allocator` feature.
 
-Add `flex_array` to your `Cargo.toml`. If you want to enable the std allocator enable the `std_alloc` feature.
+## Getting Started
+Add `flex_array` to your `Cargo.toml`.
 ```toml
 [dependencies]
 flex_array = "0.1.0"
 ```
 
+If you want to enable the std allocator enable the `std_alloc` feature.
+```toml
+flex_array = { version = "0.1.0",  features = ["std_alloc"] }
+```
+
+## Example
+
 ```rust
 use flex_array::FlexArr;
+use flex_array::alloc::{AllocError, AltAllocator};
+
+struct YourAllocator;
+
+unsafe impl AltAllocator for YourAllocator {
+    fn allocate(
+        &self,
+        _layout: core::alloc::Layout,
+    ) -> Result<core::ptr::NonNull<[u8]>, AllocError> {
+        todo!("Implement your custom allocator here");
+    }
+    unsafe fn deallocate(&self, _ptr: core::ptr::NonNull<u8>, _layout: core::alloc::Layout) {
+        todo!("Implement your custom allocator here");
+    }
+}
 
 fn main() {
     // FlexArr with u32 length/capacity and if using the std allocator.
     let mut array: FlexArr<i32> = FlexArr::new();
     // Or
     // Create an empty FlexArr with a custom allocator and a u16 for length/capacity.
-    let mut array: FlexArr<i32, YourAllocator, u16> = FlexArr::new_in(your_allocator);
+    let mut array: FlexArr<i32, YourAllocator, u16> = FlexArr::new_in(YourAllocator);
 
     // Reserve capacity for 100 elements.
     array.reserve(100).expect("Failed to allocate memory");
