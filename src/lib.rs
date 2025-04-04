@@ -39,3 +39,8 @@ mod flex_array;
 pub mod types;
 
 pub use flex_array::FlexArr;
+
+#[cfg(all(feature = "alloc_api2", feature = "experimental_allocator"))]
+compile_error!(
+    "Cannot enable both `alloc_api2` and `experimental_allocator` features, Instead, enable `nightly` for the Allocator Api2 crate and just `experimental_allocator`"
+);
