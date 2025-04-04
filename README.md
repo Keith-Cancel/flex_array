@@ -28,14 +28,14 @@ I created `FlexArr` to address some of the limitations inherent in Rust’s stan
 - **`std_alloc`**
   Enables a wrapper type called `Global` that implements `AltAllocator` using the standard allocator APIs. This provides a drop-in replacement for applications that rely on the standard memory allocator.
 
-- **`experimental_allocator`**
+- **`alloc_unstable`**
   Enables support for Rust’s unstable `Allocator` trait for custom memory allocators. When used in conjunction with `std_alloc`, this feature re-exports the `Global` type directly from the `std` crate rather than using the custom `Global` wrapper provided by `flex_array`.
 
 - **`alloc_api2`**
   Enables support for the `allocator-api2` crate, which also provides an `Allocator` trait in stable rust. This way if you already have allocators written against this you can use them with the `flex_array` crate.
-  **Note:** This feature should not be enabled with `experimental_allocator` feature. If you want to use both
-  just able to enable `experimental_allocator` and `nightly` in the `allocator-api2` crate. Additionally, if you
-  are using the `nightly` feature of the `allocator-api2` crate you will need to enable the `experimental_allocator` feature.
+  **Note:** This feature should not be enabled with `alloc_unstable` feature. If you want to use both
+  just able to enable `alloc_unstable` and `nightly` in the `allocator-api2` crate. Additionally, if you
+  are using the `nightly` feature of the `allocator-api2` crate you will need to enable the `alloc_unstable` feature.
 
 ## Getting Started
 Add `flex_array` to your `Cargo.toml`.

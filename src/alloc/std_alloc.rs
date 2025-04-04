@@ -1,12 +1,12 @@
 pub use alloc_def::Global;
 
-#[cfg(feature = "experimental_allocator")]
+#[cfg(feature = "alloc_unstable")]
 mod alloc_def {
     /// Re-export the std Global implementation of allocator APIs.
     pub use std::alloc::Global;
 }
 
-#[cfg(not(feature = "experimental_allocator"))]
+#[cfg(not(feature = "alloc_unstable"))]
 mod alloc_def {
     use core::ptr;
     use core::ptr::NonNull;

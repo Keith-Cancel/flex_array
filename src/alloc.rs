@@ -1,31 +1,31 @@
 //! Contains mainly allocator types and traits used by `FlexArr` The most important being
 //! the `AltAllocator` trait, and the `AllocError` type.
 //!
-//! If the `experimental_allocator` feature is enabled, the `AltAllocator`
+//! If the `alloc_unstable` feature is enabled, the `AltAllocator`
 //! trait is implemented for types that implement the allocator api `Allocator` trait.
 //!
 //! If built with the `std_alloc` feature, a wrapper called `Global` is also
-//! provided. Further, if the `experimental_allocator` feature is enabled,
+//! provided. Further, if the `alloc_unstable` feature is enabled,
 //! the allocator APIs `Global` is re-exported instead.
 
-#[cfg(all(feature = "alloc_api2", not(feature = "experimental_allocator")))]
+#[cfg(all(feature = "alloc_api2", not(feature = "alloc_unstable")))]
 mod alloc_api2;
-#[cfg(feature = "experimental_allocator")]
+#[cfg(feature = "alloc_unstable")]
 mod alloc_unstable;
 mod alt_alloc;
 #[cfg(feature = "std_alloc")]
 mod std_alloc;
 
-#[cfg(feature = "experimental_allocator")]
+#[cfg(feature = "alloc_unstable")]
 pub use core::alloc::AllocError;
 
-#[cfg(not(feature = "experimental_allocator"))]
+#[cfg(not(feature = "alloc_unstable"))]
 pub use alloc_error::AllocError;
 pub use alt_alloc::AltAllocator;
 #[cfg(feature = "std_alloc")]
 pub use std_alloc::Global;
 
-#[cfg(not(feature = "experimental_allocator"))]
+#[cfg(not(feature = "alloc_unstable"))]
 mod alloc_error {
     use core::error::Error;
     use core::fmt;

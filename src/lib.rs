@@ -25,7 +25,7 @@
 //! - `std_alloc` – Enables a wrapper called `Global` that implements `AltAllocator` using the standard
 //!   allocator APIs.
 //!
-//! - `experimental_allocator` – Enables support for Rust’s unstable `Allocator` trait for custom
+//! - `alloc_unstable` – Enables support for Rust’s unstable `Allocator` trait for custom
 //!   allocators. When used with `std_alloc`, this re-exports the `Global` type from `std` instead
 //!   of the custom wrapper named `Global`.
 //!
@@ -33,13 +33,13 @@
 //!   Enables support for the `allocator-api2` crate, which also provides an `Allocator` trait
 //!   in stable rust. This way if you already have allocators written against this you can use
 //!   them with the `flex_array` crate.
-//!   **Note:** This feature should not be enabled with `experimental_allocator` feature. If
-//!   you want to use both just able to enable `experimental_allocator` and `nightly` in the
+//!   **Note:** This feature should not be enabled with `alloc_unstable` feature. If
+//!   you want to use both just able to enable `alloc_unstable` and `nightly` in the
 //!   `allocator-api2` crate. Additionally, if you are using the `nightly` feature of the
-//!  `allocator-api2` crate you will need to enable the `experimental_allocator` feature.
+//!  `allocator-api2` crate you will need to enable the `alloc_unstable` feature.
 
 #![no_std]
-#![cfg_attr(feature = "experimental_allocator", feature(allocator_api))]
+#![cfg_attr(feature = "alloc_unstable", feature(allocator_api))]
 
 #[cfg(any(feature = "std_alloc", test))]
 extern crate std;
@@ -53,7 +53,7 @@ pub use flex_array::FlexArr;
 // Kinda annoying I could avoid this with specialization, but I can only have one blanket impl for AltAllocator unless
 // I used specialization. However, I decided against having a specialization flag. Specialization has soundness holes
 // and can crash the compiler. So just treat this as a compiler error for now. =(
-#[cfg(all(feature = "alloc_api2", feature = "experimental_allocator"))]
+#[cfg(all(feature = "alloc_api2", feature = "alloc_unstable"))]
 compile_error!(
-    "Cannot enable both `alloc_api2` and `experimental_allocator` features, Instead, enable `nightly` for the Allocator Api2 crate and just `experimental_allocator`"
+    "Cannot enable both `alloc_api2` and `alloc_unstable` features, Instead, enable `nightly` for the Allocator Api2 crate and just `alloc_unstable`"
 );
