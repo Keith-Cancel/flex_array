@@ -20,4 +20,5 @@ allocator-api2 = { version = "0.2.21", optional = true }
 default = []
 experimental_allocator = []
 std_alloc = []
-allocator_api2 = ["dep:allocator-api2"]
+alloc_api2 = ["dep:allocator-api2"]
+alloc_api2_specialization = ["alloc_api2"]
