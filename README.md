@@ -41,12 +41,12 @@ I created `FlexArr` to address some of the limitations inherent in Rust’s stan
 Add `flex_array` to your `Cargo.toml`.
 ```toml
 [dependencies]
-flex_array = "0.2.0"
+flex_array = "0.2.1"
 ```
 
 If you want to enable the std allocator enable the `std_alloc` feature.
 ```toml
-flex_array = { version = "0.2.0",  features = ["std_alloc"] }
+flex_array = { version = "0.2.1",  features = ["std_alloc"] }
 ```
 
 ## Example
