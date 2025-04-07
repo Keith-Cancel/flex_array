@@ -161,6 +161,12 @@ where
 
         self.inner.length = length;
     }
+
+    /// Returns a reference to the current allocator.
+    #[inline]
+    pub const fn allocator(array: &Self) -> &A {
+        return Inner::allocator(&array.inner);
+    }
 }
 
 // Methods for working with individual items.

@@ -57,6 +57,11 @@ where
         };
     }
 
+    #[inline]
+    pub(crate) const fn allocator(inner: &Self) -> &A {
+        return &inner.alloc;
+    }
+
     pub(crate) fn expand_capacity_at_least(&mut self, capacity: L, layout: Layout) -> FlexArrResult<()> {
         // Use the capacity function so this returns the MAX value for ZST.
         let old_cap = self.capacity(layout.size());
