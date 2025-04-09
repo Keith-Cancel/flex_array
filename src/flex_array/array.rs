@@ -590,3 +590,26 @@ where
         return self.as_mut_slice();
     }
 }
+
+impl<'a, T, A: AltAllocator, L: LengthType> IntoIterator for &'a FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    type Item = &'a T;
+    type IntoIter = core::slice::Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        return self.as_slice().iter();
+    }
+}
+
+impl<'a, T, A: AltAllocator, L: LengthType> IntoIterator for &'a mut FlexArr<T, A, L>
+where
+    usize: TryFrom<L>,
+{
+    type Item = &'a mut T;
+    type IntoIter = core::slice::IterMut<'a, T>;
+    fn into_iter(self) -> Self::IntoIter {
+        return self.as_mut_slice().iter_mut();
+    }
+}

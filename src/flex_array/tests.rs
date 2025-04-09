@@ -235,6 +235,7 @@ mod std_alloc {
     fn push_pop() {
         let mut arr = FlexArr::<u8>::new();
         assert_eq!(size_of_val(&arr), size_of::<ExpectedSizeU32>());
+        assert_eq!(arr.last(), None);
 
         arr.push(0xcu8).unwrap();
         arr.push(0xau8).unwrap();
@@ -242,6 +243,8 @@ mod std_alloc {
         arr.push(0xeu8).unwrap();
 
         assert_eq!(arr.len(), 4);
+        assert_eq!(arr.last(), Some(&0xeu8));
+        assert_eq!(arr.last_mut(), Some(&mut 0xeu8));
 
         assert_eq!(arr[0u32], 0xc);
         assert_eq!(arr.get(0), Some(&0xcu8));
@@ -516,6 +519,53 @@ mod std_alloc {
 
         for i in 0..arr.len() {
             assert_eq!(arr[i], i as u8);
+        }
+    }
+
+    #[test]
+    fn iter() {
+        let mut arr = FlexArr::<u8>::new();
+
+        arr.push(0x1).unwrap();
+        arr.push(0x2).unwrap();
+        arr.push(0x3).unwrap();
+        arr.push(0x4).unwrap();
+        arr.push(0x5).unwrap();
+        arr.push(0x6).unwrap();
+        arr.push(0x7).unwrap();
+
+        let mut i = 1u8;
+        for elem in &arr {
+            assert_eq!(*elem, i);
+            i += 1;
+        }
+        assert_eq!(i, 8);
+    }
+
+    #[test]
+    fn iter_mut() {
+        let mut arr = FlexArr::<u8>::new();
+
+        arr.push(0x1).unwrap();
+        arr.push(0x2).unwrap();
+        arr.push(0x3).unwrap();
+        arr.push(0x4).unwrap();
+        arr.push(0x5).unwrap();
+        arr.push(0x6).unwrap();
+        arr.push(0x7).unwrap();
+
+        let mut i = 1u8;
+        for elem in &mut arr {
+            assert_eq!(*elem, i);
+            *elem += 1;
+            i += 1;
+        }
+        assert_eq!(i, 8);
+
+        i = 2;
+        for elem in &arr {
+            assert_eq!(*elem, i);
+            i += 1;
         }
     }
 }
