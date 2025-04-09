@@ -292,7 +292,7 @@ where
         if index >= len {
             return None;
         }
-        return Some(self.get_unchecked(index));
+        return Some(unsafe { self.get_unchecked(index) });
     }
 
     /// Returns a reference to the element at the specified `index`
@@ -306,7 +306,7 @@ where
     ///
     /// The caller must ensure that `index` is within bounds.
     #[inline]
-    pub fn get_unchecked(&self, index: L) -> &T {
+    pub unsafe fn get_unchecked(&self, index: L) -> &T {
         let usz_ind = index.as_usize();
         let loc = unsafe { self.as_ptr().add(usz_ind) };
         let refr = unsafe { &*loc };
@@ -324,7 +324,7 @@ where
         if index >= len {
             return None;
         }
-        return Some(self.get_mut_unchecked(index));
+        return Some(unsafe { self.get_mut_unchecked(index) });
     }
 
     /// Returns a mutable reference to the element at the specified `index`
@@ -338,7 +338,7 @@ where
     ///
     /// The caller must ensure that `index` is within bounds.
     #[inline]
-    pub fn get_mut_unchecked(&mut self, index: L) -> &mut T {
+    pub unsafe fn get_mut_unchecked(&mut self, index: L) -> &mut T {
         let usz_ind = index.as_usize();
         let loc = unsafe { self.as_mut_ptr().add(usz_ind) };
         let refr = unsafe { &mut *loc };
