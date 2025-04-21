@@ -470,8 +470,8 @@ where
     /// The caller should ensure the underlying storage outlives this pointer.
     /// Adding/removing items to the `FlexArr` can cause the pointer to become invalid.
     #[inline]
-    pub const fn as_mut_ptr(&self) -> *mut T {
-        return self.inner.get_ptr();
+    pub const fn as_mut_ptr(&mut self) -> *mut T {
+        return self.inner.get_mut_ptr();
     }
 }
 

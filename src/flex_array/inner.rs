@@ -144,7 +144,13 @@ where
     }
 
     #[inline]
-    pub(crate) const fn get_ptr<T>(&self) -> *mut T {
+    pub(crate) const fn get_ptr<T>(&self) -> *const T {
+        let ptr = self.ptr.cast::<T>();
+        return ptr.as_ptr();
+    }
+
+    #[inline]
+    pub(crate) const fn get_mut_ptr<T>(&mut self) -> *mut T {
         let ptr = self.ptr.cast::<T>();
         return ptr.as_ptr();
     }
