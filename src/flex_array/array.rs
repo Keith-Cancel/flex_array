@@ -3,6 +3,7 @@ use core::marker::PhantomData;
 use core::ops::Index;
 use core::ops::IndexMut;
 use core::ptr;
+use core::ptr::NonNull;
 use core::slice;
 
 use super::inner::Inner;
@@ -472,6 +473,22 @@ where
     #[inline]
     pub const fn as_mut_ptr(&mut self) -> *mut T {
         return self.inner.get_mut_ptr();
+    }
+
+    /// Returns a `NonNull` pointer to the underlying storage. If the type is zero sized
+    /// the pointer value will be a dangling pointer. Like one would get with
+    /// `NonNull::dangling()` ect...
+    ///
+    /// # Safety
+    /// The caller should ensure the underlying storage outlives this pointer.
+    /// Adding/removing items to the `FlexArr` can cause the pointer to become invalid.
+    #[inline]
+    pub const fn as_non_null(&mut self) -> NonNull<T> {
+        let ptr = self.as_mut_ptr();
+        // Safety, this should always be non-null since the new_methods
+        // always start with minimum a dangling pointer, and if memory
+        // is allocated it also will be non-null.
+        return unsafe { NonNull::new_unchecked(ptr) };
     }
 }
 
