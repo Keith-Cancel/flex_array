@@ -1,5 +1,7 @@
 use core::alloc::Layout;
 use core::marker::PhantomData;
+use core::mem::ManuallyDrop;
+use core::mem::forget;
 use core::ops::Index;
 use core::ops::IndexMut;
 use core::ptr;
@@ -489,6 +491,22 @@ where
         // always start with minimum a dangling pointer, and if memory
         // is allocated it also will be non-null.
         return unsafe { NonNull::new_unchecked(ptr) };
+    }
+
+    /// Consumes the `FlexArr` and returns a `NonNull` of the underlying memory.
+    /// This does not return the length and capacity and allocator. If that's
+    /// what one wants use `into_raw_parts()` this is mainly useful if your already
+    /// tracking those elsewhere somehow.
+    ///
+    /// After calling this you are responsible for managing the memory, if you need
+    /// to run the destructor to not leak the memory convert it back into a flex array
+    /// with from_raw_parts()
+    #[inline]
+    pub const fn into_non_null(self) -> NonNull<T> {
+        let mut tmp = self;
+        let ptr = tmp.as_non_null();
+        forget(tmp);
+        return ptr;
     }
 }
 
