@@ -568,4 +568,29 @@ mod std_alloc {
             i += 1;
         }
     }
+
+    #[test]
+    fn into_parts() {
+        let mut arr = FlexArr::<String>::new();
+
+        arr.push("Hello".to_string()).unwrap();
+        arr.push("There".to_string()).unwrap();
+        arr.push("It is a beautiful day".to_string()).unwrap();
+
+        let (ptr, len, cap, alloc) = arr.into_parts();
+
+        assert_eq!(len, 3);
+
+        let str_ref = unsafe { ptr.as_ref().as_str() };
+        assert_eq!(str_ref, "Hello");
+
+        let str_ref = unsafe { ptr.add(1).as_ref().as_str() };
+        assert_eq!(str_ref, "There");
+
+        let str_ref = unsafe { ptr.add(2).as_ref().as_str() };
+        assert_eq!(str_ref, "It is a beautiful day");
+
+        // Make sure everything is dropped.
+        let _ = unsafe { FlexArr::from_parts(ptr, len, cap, alloc) };
+    }
 }
