@@ -527,11 +527,12 @@ where
         };
     }
 
-    /// Consumes the `FlexArr` and returns a tuple containing the following:
-    /// * `NonNull<T>`: A pointer to the underlying memory.
-    /// * `L`: The length of the `FlexArr`.
-    /// * `L`: The capacity of the `FlexArr`.
-    /// * `A`: The allocator used to allocate the underlying memory.
+    /// Consumes the `FlexArr` and returns its raw components as a tuple:
+    ///
+    /// - `NonNull<T>`: A pointer to the underlying memory.
+    /// - `L`: The length of the `FlexArr`.
+    /// - `L`: The capacity of the `FlexArr`.
+    /// - `A`: The allocator used to allocate the memory.
     ///
     /// After calling this method, you are responsible for managing the memory. If you need
     /// to properly deallocate it and avoid leaks, you should reconstruct a `FlexArr` using
