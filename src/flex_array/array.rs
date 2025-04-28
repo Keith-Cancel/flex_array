@@ -504,16 +504,24 @@ where
         return ptr;
     }
 
-    /// Constructs a `FlexArr` from a pointer, length, capacity, and allocator.
+    /// Constructs a `FlexArr` from its raw components: a pointer, length, capacity, and allocator.
     ///
     /// # Safety
-    /// This function has quite a few safety requirements that must be upheld.
-    /// * `ptr`: Must have been allocated with the same allocator as `alloc`.
-    ///        Additionally the number of bytes must not be larger than `isize::MAX`
-    /// * `T`: Layout of `T` must be the same as what was used to allocate `ptr`.
-    /// * `length`: Must not be greater than capacity, secondly it must not be greater than
-    ///           the number properly initialized elements in `ptr`.
-    /// * `capacity`: Must match the size of the `Layout` used to allocate `ptr`.
+    ///
+    /// This function has quite a few safety requirements that must be upheld:
+    ///
+    /// - `ptr`
+    ///   - Must point to a memory block allocated by `alloc`.
+    ///   - The total size in bytes must not exceed `isize::MAX`.
+    /// - `T`
+    ///   - The layout of `T` must match the layout used when allocating `ptr`.
+    /// - `length`
+    ///   - Must be ≤ `capacity`.
+    ///   - Must not exceed the number of properly initialized elements in `ptr`.
+    /// - `capacity`
+    ///   - Must match the number of elements the original allocation can hold (i.e., the layout used).
+    ///
+    /// Violating any of these requirements results like will result in undefined behavior
     #[inline]
     pub const unsafe fn from_parts(ptr: NonNull<T>, length: L, capacity: L, alloc: A) -> Self {
         return Self {
