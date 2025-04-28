@@ -27,12 +27,10 @@ macro_rules! define_inner_struct {
         where
             usize: TryFrom<L>,
         {
-            ptr:               NonNull<u8>,
-            alloc:             A,
-            // The length is put here so rust can pack the structs more tightly.
-            // The inner impl does not use this field.
-            pub(crate) length: L,
-            capacity:          L,
+            pub(crate) ptr:      NonNull<u8>,
+            pub(crate) alloc:    A,
+            pub(crate) length:   L, // The length even though not used by methods is put here to help avoid padding.
+            pub(crate) capacity: L,
         }
     };
 }
