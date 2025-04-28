@@ -154,4 +154,9 @@ where
         let ptr = self.ptr.cast::<T>();
         return ptr.as_ptr();
     }
+
+    #[inline]
+    pub(crate) const fn get_non_null<T>(&mut self) -> NonNull<T> {
+        return self.ptr.cast();
+    }
 }
