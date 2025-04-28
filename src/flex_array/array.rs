@@ -1,6 +1,5 @@
 use core::alloc::Layout;
 use core::marker::PhantomData;
-use core::mem::ManuallyDrop;
 use core::mem::forget;
 use core::ops::Index;
 use core::ops::IndexMut;
@@ -486,26 +485,22 @@ where
     /// Adding/removing items to the `FlexArr` can cause the pointer to become invalid.
     #[inline]
     pub const fn as_non_null(&mut self) -> NonNull<T> {
-        let ptr = self.as_mut_ptr();
-        // Safety, this should always be non-null since the new_methods
-        // always start with minimum a dangling pointer, and if memory
-        // is allocated it also will be non-null.
-        return unsafe { NonNull::new_unchecked(ptr) };
+        return self.inner.get_non_null();
     }
 
     /// Consumes the `FlexArr` and returns a `NonNull` pointer to the underlying memory.
     ///
-    /// Unlike `into_raw_parts()`, this method only returns the pointer; it does not return
+    /// Unlike `into_parts()`, this method only returns the pointer; it does not return
     /// the length, capacity, or allocator. This is mainly useful if you are already tracking
     /// those separately.
     ///
     /// After calling this method, you are responsible for managing the memory. If you need
     /// to properly deallocate it and avoid leaks, you must reconstruct a `FlexArr` using
-    /// `from_raw_parts()`.
+    /// `from_parts()`.
     #[inline]
     pub const fn into_non_null(self) -> NonNull<T> {
         let mut tmp = self;
-        let ptr = tmp.as_non_null();
+        let ptr = tmp.inner.get_non_null();
         forget(tmp);
         return ptr;
     }
