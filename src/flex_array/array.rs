@@ -495,14 +495,59 @@ where
     /// those separately.
     ///
     /// After calling this method, you are responsible for managing the memory. If you need
-    /// to properly deallocate it and avoid leaks, you must reconstruct a `FlexArr` using
+    /// to properly deallocate it and avoid leaks, you should reconstruct a `FlexArr` using
     /// `from_parts()`.
     #[inline]
-    pub const fn into_non_null(self) -> NonNull<T> {
-        let mut tmp = self;
-        let ptr = tmp.inner.get_non_null();
-        forget(tmp);
+    pub const fn into_non_null(mut self) -> NonNull<T> {
+        let ptr = self.inner.get_non_null();
+        forget(self);
         return ptr;
+    }
+
+    /// Constructs a `FlexArr` from a pointer, length, capacity, and allocator.
+    ///
+    /// # Safety
+    /// This function has quite a few safety requirements that must be upheld.
+    /// * `ptr`: Must have been allocated with the same allocator as `alloc`.
+    ///        Additionally the number of bytes must not be larger than `isize::MAX`
+    /// * `T`: Layout of `T` must be the same as what was used to allocate `ptr`.
+    /// * `length`: Must not be greater than capacity, secondly it must not be greater than
+    ///           the number properly initialized elements in `ptr`.
+    /// * `capacity`: Must match the size of the `Layout` used to allocate `ptr`.
+    #[inline]
+    pub const unsafe fn from_parts(ptr: NonNull<T>, length: L, capacity: L, alloc: A) -> Self {
+        return Self {
+            inner: Inner {
+                ptr:      ptr.cast(),
+                length:   length,
+                capacity: capacity,
+                alloc:    alloc,
+            },
+            _ph:   PhantomData,
+        };
+    }
+
+    /// Consumes the `FlexArr` and returns a tuple containing the following:
+    /// * `NonNull<T>`: A pointer to the underlying memory.
+    /// * `L`: The length of the `FlexArr`.
+    /// * `L`: The capacity of the `FlexArr`.
+    /// * `A`: The allocator used to allocate the underlying memory.
+    ///
+    /// After calling this method, you are responsible for managing the memory. If you need
+    /// to properly deallocate it and avoid leaks, you should reconstruct a `FlexArr` using
+    /// `from_parts()`.
+    #[inline]
+    pub const fn into_parts(mut self) -> (NonNull<T>, L, L, A) {
+        let ptr: NonNull<T> = self.inner.get_non_null();
+        let len = self.inner.length;
+        let cap = self.inner.capacity(Self::SIZE);
+
+        let self_ptr = &mut self as *mut Self;
+        let alloc_ptr = unsafe { &mut (*self_ptr).inner.alloc as *mut A };
+        let alloc = unsafe { alloc_ptr.read() };
+
+        forget(self);
+        return (ptr, len, cap, alloc);
     }
 }
 
