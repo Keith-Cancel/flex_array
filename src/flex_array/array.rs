@@ -493,14 +493,15 @@ where
         return unsafe { NonNull::new_unchecked(ptr) };
     }
 
-    /// Consumes the `FlexArr` and returns a `NonNull` of the underlying memory.
-    /// This does not return the length and capacity and allocator. If that's
-    /// what one wants use `into_raw_parts()` this is mainly useful if your already
-    /// tracking those elsewhere somehow.
+    /// Consumes the `FlexArr` and returns a `NonNull` pointer to the underlying memory.
     ///
-    /// After calling this you are responsible for managing the memory, if you need
-    /// to run the destructor to not leak the memory convert it back into a flex array
-    /// with from_raw_parts()
+    /// Unlike `into_raw_parts()`, this method only returns the pointer; it does not return
+    /// the length, capacity, or allocator. This is mainly useful if you are already tracking
+    /// those separately.
+    ///
+    /// After calling this method, you are responsible for managing the memory. If you need
+    /// to properly deallocate it and avoid leaks, you must reconstruct a `FlexArr` using
+    /// `from_raw_parts()`.
     #[inline]
     pub const fn into_non_null(self) -> NonNull<T> {
         let mut tmp = self;
