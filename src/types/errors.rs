@@ -10,6 +10,7 @@ pub enum ErrorReason {
     UsizeOverflow,
     LayoutFailure,
     AllocFailure,
+    IndexOutOfBounds,
 }
 
 /// A type alias for `Result<T, FlexArrErr>`
@@ -38,6 +39,7 @@ impl fmt::Display for FlexArrErr {
             ErrorReason::UsizeOverflow => f.write_str("usize overflowed."),
             ErrorReason::LayoutFailure => f.write_str("Failed to create layout."),
             ErrorReason::AllocFailure => f.write_str("An allocation failure occurred."),
+            ErrorReason::IndexOutOfBounds => f.write_str("A given index is out of bounds."),
         }
     }
 }
