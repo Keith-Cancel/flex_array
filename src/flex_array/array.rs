@@ -346,6 +346,32 @@ where
         let refr = unsafe { &mut *loc };
         return refr;
     }
+
+    pub fn insert(&mut self, index: L, item: T) -> FlexArrResult<()> {
+        let len = self.inner.length.as_usize();
+        let Ok(index) = usize::try_from(index) else {
+            return Err(FlexArrErr::new(ErrorReason::UsizeOverflow));
+        };
+
+        if index > len {
+            return Err(FlexArrErr::new(ErrorReason::IndexOutOfBounds));
+        }
+
+        let needed = self.capacity_needed(L::ONE_VALUE)?;
+        if needed > self.capacity() {
+            self.inner.expand_capacity_at_least(needed, Self::LAYOUT)?;
+        }
+
+        // Shift all the elements over one to insert the item.
+        let pos = unsafe { self.as_mut_ptr().add(index) };
+        if index < len {
+            unsafe { ptr::copy(pos, pos.add(1), len - index) };
+        }
+        unsafe { ptr::write(pos, item) };
+
+        self.inner.length = self.inner.length + L::ONE_VALUE;
+        return Ok(());
+    }
 }
 
 // Methods for working with or getting slices.
