@@ -184,6 +184,7 @@ fn extend_from_slice_fail() {
 #[cfg(feature = "std_alloc")]
 mod std_alloc {
     use core::cell::Cell;
+    use core::panic;
     use std::string::String;
     use std::string::ToString;
 
@@ -592,5 +593,47 @@ mod std_alloc {
 
         // Make sure everything is dropped.
         let _ = unsafe { FlexArr::from_parts(ptr, len, cap, alloc) };
+    }
+
+    #[test]
+    fn insert() {
+        let mut arr = FlexArr::<u8>::new();
+        arr.push(0x0).unwrap();
+        arr.push(0x2).unwrap();
+        arr.push(0x4).unwrap();
+
+        assert_eq!(arr[0], 0x0);
+        assert_eq!(arr[1], 0x2);
+        assert_eq!(arr[2], 0x4);
+
+        arr.insert(1, 0x1).unwrap();
+
+        assert_eq!(arr[0], 0x0);
+        assert_eq!(arr[1], 0x1);
+        assert_eq!(arr[2], 0x2);
+        assert_eq!(arr[3], 0x4);
+
+        arr.insert(3, 0x3).unwrap();
+
+        assert_eq!(arr[0], 0x0);
+        assert_eq!(arr[1], 0x1);
+        assert_eq!(arr[2], 0x2);
+        assert_eq!(arr[3], 0x3);
+        assert_eq!(arr[4], 0x4);
+
+        arr.insert(5, 0x5).unwrap();
+
+        assert_eq!(arr[0], 0x0);
+        assert_eq!(arr[1], 0x1);
+        assert_eq!(arr[2], 0x2);
+        assert_eq!(arr[3], 0x3);
+        assert_eq!(arr[4], 0x4);
+        assert_eq!(arr[5], 0x5);
+
+        let Err(ret) = arr.insert(7, 0x6) else {
+            panic!("Insert should have failed!");
+        };
+
+        assert_eq!(ret.reason(), ErrorReason::IndexOutOfBounds);
     }
 }
