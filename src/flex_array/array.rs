@@ -347,6 +347,18 @@ where
         return refr;
     }
 
+    /// Inserts an element at the specified `index`. If the index is out of bounds, an error
+    /// is returned.
+    ///
+    /// If there isn’t enough capacity, this method attempts to expand the underlying storage.
+    /// Should the allocation fail, a `FlexArrErr` is returned.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FlexArrErr` if memory expansion fails or if there is a conversion error when
+    /// determining the new index.
+    ///
+    /// Additionally, can return `FlexArrErr` with a reason of `IndexOutOfBounds` if the index is out of bounds.
     pub fn insert(&mut self, index: L, item: T) -> FlexArrResult<()> {
         let len = self.inner.length.as_usize();
         let Ok(index) = usize::try_from(index) else {
